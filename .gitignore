@@ -1,0 +1,13 @@
+.idea/
+*.iml
+
+/build/
+.gradle/
+gradle
+
+*.log
+
+.DS_Store
+Thumbs.db
+
+*.png
