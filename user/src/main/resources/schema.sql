@@ -1,21 +1,21 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    id       BIGINT PRIMARY KEY,
-    username VARCHAR(50) unique,
-    password VARCHAR(100)
+    id       BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    username VARCHAR(50) UNIQUE NOT NULL ,
+    password VARCHAR(100) NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS roles
 (
-    id   BIGINT PRIMARY KEY,
-    role varchar(50)
+    id   BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    role varchar(50) UNIQUE NOT NULL
 );
 
 
 CREATE TABLE IF NOT EXISTS user_role
 (
-    id      BIGINT PRIMARY KEY,
+    id      BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id BIGINT,
     role_id BIGINT,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
