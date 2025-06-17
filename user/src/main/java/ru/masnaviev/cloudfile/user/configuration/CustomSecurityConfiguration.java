@@ -34,8 +34,8 @@ public class CustomSecurityConfiguration {
         http.sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/sign-up").permitAll()
-                        .requestMatchers("/api/auth/sign-in").permitAll()
+                        .requestMatchers("/api/auth/sign-up").anonymous()
+                        .requestMatchers("/api/auth/sign-in").anonymous()
                         .requestMatchers("/api/auth/sign-out").authenticated()
                         .requestMatchers("/api/user/me").authenticated()
                         .anyRequest().denyAll());

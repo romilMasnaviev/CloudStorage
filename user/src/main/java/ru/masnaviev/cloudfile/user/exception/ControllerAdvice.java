@@ -7,7 +7,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.masnaviev.cloudfile.user.dto.user.ErrorResponse;
+
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ControllerAdvice {
@@ -29,13 +30,13 @@ public class ControllerAdvice {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(409));
     }
 
-    @ExceptionHandler(UserDoesntExistException.class)
-    public ResponseEntity<ErrorResponse> userDoesntExistExceptionHandler(UserDoesntExistException exception) {
-        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(401));
-    }
-
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> badCredentialsExceptionHandler(BadCredentialsException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(401));
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ErrorResponse> noSuchElementExceptionHandler(NoSuchElementException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(404));
     }
 }
