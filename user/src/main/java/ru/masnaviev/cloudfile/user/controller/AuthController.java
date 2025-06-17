@@ -53,7 +53,7 @@ public class AuthController {
     @PostMapping("sign-in")
     public ResponseEntity<?> authorization(@RequestBody @Valid UserAuthorizationRequest request,
                                            HttpServletRequest servletRequest) {
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
+        var token = new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
         Authentication authentication = manager.authenticate(token);
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
