@@ -1,5 +1,6 @@
 package ru.masnaviev.cloudfile.user.service;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,8 +10,8 @@ import ru.masnaviev.cloudfile.user.model.SecurityUser;
 import ru.masnaviev.cloudfile.user.repository.UserRepository;
 
 @Service
-@RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository repository;
 

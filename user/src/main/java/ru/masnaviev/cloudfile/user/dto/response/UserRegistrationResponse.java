@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudfile.user.dto.user.response;
+package ru.masnaviev.cloudfile.user.dto.response;
 
 public record UserRegistrationResponse(String username) {
 }

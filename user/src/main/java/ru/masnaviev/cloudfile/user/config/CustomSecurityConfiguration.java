@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudfile.user.configuration;
+package ru.masnaviev.cloudfile.user.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @RequiredArgsConstructor
-public class CustomSecurityConfiguration {
+class CustomSecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -28,18 +28,19 @@ public class CustomSecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable);
-        http.cors(AbstractHttpConfigurer::disable);
-        http.formLogin(AbstractHttpConfigurer::disable);
-        http.sessionManagement(configurer -> configurer
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/sign-up").anonymous()
                         .requestMatchers("/api/auth/sign-in").anonymous()
                         .requestMatchers("/api/auth/sign-out").authenticated()
                         .requestMatchers("/api/user/me").authenticated()
-                        .anyRequest().denyAll());
-        return http.build();
+                        .anyRequest().denyAll())
+                .build();
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.masnaviev.cloudfile.user.exception.custom.UserAlreadyExistsException;
 
 import java.util.NoSuchElementException;
 

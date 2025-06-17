@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudfile.user.dto.user.request;
+package ru.masnaviev.cloudfile.user.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
