@@ -14,7 +14,7 @@ class UserController {
 
     @GetMapping("me")
     public ResponseEntity<?> me(@AuthenticationPrincipal UserDetails userDetails) {
-
-        return ResponseEntity.ok().body(new UserMeResponse(userDetails.getUsername()));
+        UserMeResponse response = new UserMeResponse(userDetails.getUsername());
+        return ResponseEntity.ok().body(response);
     }
 }
