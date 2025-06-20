@@ -18,9 +18,11 @@ repositories {
 }
 
 ext {
-    redisVersion = '3.5.0'
     flywayVersion = '11.8.2'
+    gsonVersion = '2.13.1'
+    redisVersion = '3.5.0'
     lombokVersion = '1.18.38'
+    redistestContainerVersion = '1.6.4'
     testContainersVersion = '1.21.1'
 }
 
@@ -43,7 +45,7 @@ dependencies {
     // Lombok & Gson
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
-    implementation 'com.google.code.gson:gson:2.13.1'
+    implementation("com.google.code.gson:gson:${gsonVersion}")
 
     //Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -52,6 +54,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:${testContainersVersion}")
     testImplementation("org.testcontainers:junit-jupiter:${testContainersVersion}")
     testImplementation("org.testcontainers:postgresql:${testContainersVersion}")
+    implementation("com.redis.testcontainers:testcontainers-redis:${redistestContainerVersion}")
 }
 
 test {
