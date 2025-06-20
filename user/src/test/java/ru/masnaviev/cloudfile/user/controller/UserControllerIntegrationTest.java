@@ -10,9 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.masnaviev.cloudfile.user.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.user.MockMvcHelperConfig;
 import ru.masnaviev.cloudfile.user.MockMvcTestHelper;
@@ -23,11 +21,9 @@ import static ru.masnaviev.cloudfile.user.TestData.PASSWORD;
 import static ru.masnaviev.cloudfile.user.TestData.USERNAME;
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.UNAUTHORIZED;
 
-@Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
 @Import(MockMvcHelperConfig.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
     private final Gson gson = new Gson();

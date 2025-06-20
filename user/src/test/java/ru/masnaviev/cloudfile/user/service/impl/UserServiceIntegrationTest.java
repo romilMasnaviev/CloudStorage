@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.masnaviev.cloudfile.user.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.user.dto.request.UserRegistrationRequest;
 import ru.masnaviev.cloudfile.user.dto.response.UserRegistrationResponse;
@@ -18,9 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static ru.masnaviev.cloudfile.user.TestData.*;
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.USER_ALREADY_EXISTS;
 
-@Testcontainers
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class UserServiceIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired

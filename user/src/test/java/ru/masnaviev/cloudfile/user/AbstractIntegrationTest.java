@@ -4,18 +4,18 @@ import com.redis.testcontainers.RedisContainer;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@Testcontainers
-public class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest {
 
-    @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16-alpine");
 
-    @Container
     static RedisContainer redisContainer = new RedisContainer(DockerImageName.parse("redis:8-alpine"));
+
+    static {
+        postgreSQLContainer.start();
+        redisContainer.start();
+    }
 
     @DynamicPropertySource
     static void property(DynamicPropertyRegistry registry) {
