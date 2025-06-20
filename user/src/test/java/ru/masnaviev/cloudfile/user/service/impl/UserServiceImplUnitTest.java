@@ -33,7 +33,7 @@ class UserServiceImplUnitTest {
     private UserServiceImpl service;
 
     @Test
-    void whenUserExists_thenThrowUserAlreadyExistsException() {
+    void registerUser_whenUserExists_thenThrowUserAlreadyExistsException() {
         when(repository.existsByUsername(eq(USERNAME))).thenReturn(true);
         UserRegistrationRequest registrationRequest = new UserRegistrationRequest(USERNAME, PASSWORD);
 
@@ -45,7 +45,7 @@ class UserServiceImplUnitTest {
     }
 
     @Test
-    void whenUserDoesNotExist_thenReturnUserRegistrationResponse() {
+    void registerUser_whenUserDoesNotExist_thenReturnUserRegistrationResponse() {
         UserRegistrationRequest registrationRequest = new UserRegistrationRequest(USERNAME, PASSWORD);
         when(repository.existsByUsername(eq(USERNAME))).thenReturn(false);
         User savedUser = createUser(USERNAME, PASSWORD);

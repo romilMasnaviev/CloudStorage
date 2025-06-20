@@ -34,7 +34,7 @@ class UserServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserExists_thenThrowUserAlreadyExistsException() {
+    void registerUser_whenUserExists_thenThrowUserAlreadyExistsException() {
         UserRegistrationRequest registrationRequest = new UserRegistrationRequest(USERNAME, PASSWORD);
         repository.save(createUser(USERNAME, PASSWORD));
 
@@ -47,7 +47,7 @@ class UserServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserDoesNotExist_thenReturnUserRegistrationResponse() {
+    void registerUser_whenUserDoesNotExist_thenReturnUserRegistrationResponse() {
         UserRegistrationRequest registrationRequest = new UserRegistrationRequest(USERNAME, PASSWORD);
 
         long initialUsersCount = repository.count();

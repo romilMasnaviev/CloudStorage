@@ -49,7 +49,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenValidData_thenUserRegistrationSucceeds() throws Exception {
+    void registerUser_whenValidData_thenUserRegistrationSucceeds() throws Exception {
         MockHttpServletResponse response = performRegistration(USERNAME, PASSWORD, null);
         var registrationResponse = gson.fromJson(response.getContentAsString(), UserRegistrationResponse.class);
 
@@ -58,9 +58,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserAlreadyExists_thenReturnErrorMessage() throws Exception {
+    void registerUser_whenUserAlreadyExists_thenReturnErrorMessage() throws Exception {
         performRegistration(USERNAME, PASSWORD, null);
-
         MockHttpServletResponse response = performRegistration(USERNAME, PASSWORD, null);
         var errorResponse = gson.fromJson(response.getContentAsString(), ErrorResponse.class);
 
@@ -69,9 +68,20 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserExists_thenUserAuthorizationSucceeds() throws Exception {
+    void registerUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReRegister() throws Exception {
         performRegistration(USERNAME, PASSWORD, null);
+        MockHttpServletResponse authResponse = performAuthorization(USERNAME, PASSWORD, null);
 
+        MockHttpServletResponse reRegisterResponse = performRegistration(USERNAME, PASSWORD, authResponse.getCookies());
+        var errorResponse = gson.fromJson(reRegisterResponse.getContentAsString(), ErrorResponse.class);
+
+        assertEquals(ACCESS_DENIED, errorResponse.message());
+        assertEquals(403, reRegisterResponse.getStatus());
+    }
+
+    @Test
+    void authorizeUser_whenUserExists_thenUserAuthorizationSucceeds() throws Exception {
+        performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse response = performAuthorization(USERNAME, PASSWORD, null);
         var authResponse = gson.fromJson(response.getContentAsString(), UserAuthorizationResponse.class);
 
@@ -80,7 +90,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReAuth() throws Exception {
+    void authorizeUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReAuth() throws Exception {
         performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse firstAuthResponse = performAuthorization(USERNAME, PASSWORD, null);
 
@@ -92,20 +102,19 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReRegister() throws Exception {
+    void authorizeUser_whenInvalidCredentials_thenReturnBadCredentialsError() throws Exception {
         performRegistration(USERNAME, PASSWORD, null);
-        MockHttpServletResponse authResponse = performAuthorization(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse reRegisterResponse = performRegistration(USERNAME, PASSWORD, authResponse.getCookies());
+        MockHttpServletResponse response = performAuthorization(USERNAME, PASSWORD + "1", null);
+        var errorResponse = gson.fromJson(response.getContentAsString(), ErrorResponse.class);
 
-        var errorResponse = gson.fromJson(reRegisterResponse.getContentAsString(), ErrorResponse.class);
-
-        assertEquals(ACCESS_DENIED, errorResponse.message());
-        assertEquals(403, reRegisterResponse.getStatus());
+        assertEquals(BAD_CREDENTIALS, errorResponse.message());
+        assertEquals(401, response.getStatus());
     }
 
+
     @Test
-    void whenUserAuthorized_thenGetUserMeInfo() throws Exception {
+    void getUserMe_whenUserAuthorized_thenGetUserMeInfo() throws Exception {
         performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse authResponse = performAuthorization(USERNAME, PASSWORD, null);
 
@@ -117,9 +126,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserUnauthorized_thenReturnUnauthorizedError() throws Exception {
+    void getUserMe_whenUserUnauthorized_thenReturnUnauthorizedError() throws Exception {
         MockHttpServletResponse response = performGetMe(null);
-
         var errorResponse = gson.fromJson(response.getContentAsString(), ErrorResponse.class);
 
         assertEquals(UNAUTHORIZED, errorResponse.message());
@@ -127,7 +135,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void whenUserLogsOut_thenAccessDeniedAfterLogout() throws Exception {
+    void signOutUser_whenUserLogsOut_thenAccessDeniedAfterLogout() throws Exception {
         performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse authResponse = performAuthorization(USERNAME, PASSWORD, null);
         performGetMe(authResponse.getCookies());
@@ -138,17 +146,6 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
         assertEquals(UNAUTHORIZED, errorResponse.message());
         assertEquals(401, meResponse.getStatus());
-    }
-
-    @Test
-    void whenInvalidCredentials_thenReturnBadCredentialsError() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
-
-        MockHttpServletResponse response = performAuthorization(USERNAME, PASSWORD + "1", null);
-        var errorResponse = gson.fromJson(response.getContentAsString(), ErrorResponse.class);
-
-        assertEquals(BAD_CREDENTIALS, errorResponse.message());
-        assertEquals(401, response.getStatus());
     }
 
     private MockHttpServletResponse performRegistration(String username, String password, Cookie[] cookies) throws Exception {
