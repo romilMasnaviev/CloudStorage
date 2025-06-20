@@ -1,47 +1,43 @@
 package ru.masnaviev.cloudfile.user.controller;
 
 import com.google.gson.Gson;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.masnaviev.cloudfile.user.AbstractIntegrationTest;
-import ru.masnaviev.cloudfile.user.dto.request.UserAuthorizationRequest;
-import ru.masnaviev.cloudfile.user.dto.request.UserRegistrationRequest;
+import ru.masnaviev.cloudfile.user.MockMvcHelperConfig;
+import ru.masnaviev.cloudfile.user.MockMvcTestHelper;
 import ru.masnaviev.cloudfile.user.dto.response.UserAuthorizationResponse;
 import ru.masnaviev.cloudfile.user.dto.response.UserRegistrationResponse;
-import ru.masnaviev.cloudfile.user.exception.ErrorResponse;
-
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static ru.masnaviev.cloudfile.user.TestData.PASSWORD;
 import static ru.masnaviev.cloudfile.user.TestData.USERNAME;
-import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.*;
 
 @Testcontainers
 @AutoConfigureMockMvc
 @SpringBootTest
+@Import(MockMvcHelperConfig.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
     private final Gson gson = new Gson();
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
+    MockMvc mockMvc;
     @Autowired
-    private MockMvc mockMvc;
+    MockMvcTestHelper testHelper;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void clearDb() {
@@ -50,7 +46,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void registerUser_whenValidData_thenUserRegistrationSucceeds() throws Exception {
-        MockHttpServletResponse response = performRegistration(USERNAME, PASSWORD, null);
+        MockHttpServletResponse response = testHelper.performRegistration(USERNAME, PASSWORD, null);
         var registrationResponse = gson.fromJson(response.getContentAsString(), UserRegistrationResponse.class);
 
         assertEquals(USERNAME, registrationResponse.username());
@@ -59,30 +55,27 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void registerUser_whenUserAlreadyExists_thenReturnErrorMessage() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
-        MockHttpServletResponse response = performRegistration(USERNAME, PASSWORD, null);
-        var errorResponse = gson.fromJson(response.getContentAsString(), ErrorResponse.class);
+        testHelper.performRegistration(USERNAME, PASSWORD, null);
 
-        assertEquals(USER_ALREADY_EXISTS, errorResponse.message());
-        assertEquals(409, response.getStatus());
+        MockHttpServletResponse response = testHelper.performRegistration(USERNAME, PASSWORD, null);
+
+        testHelper.checkErrorResponse(response, USER_ALREADY_EXISTS, 409);
     }
 
     @Test
     void registerUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReRegister() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
-        MockHttpServletResponse authResponse = performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performRegistration(USERNAME, PASSWORD, null);
+        MockHttpServletResponse authResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse reRegisterResponse = performRegistration(USERNAME, PASSWORD, authResponse.getCookies());
-        var errorResponse = gson.fromJson(reRegisterResponse.getContentAsString(), ErrorResponse.class);
+        MockHttpServletResponse reRegisterResponse = testHelper.performRegistration(USERNAME, PASSWORD, authResponse.getCookies());
 
-        assertEquals(ACCESS_DENIED, errorResponse.message());
-        assertEquals(403, reRegisterResponse.getStatus());
+        testHelper.checkErrorResponse(reRegisterResponse, ACCESS_DENIED, 403);
     }
 
     @Test
     void authorizeUser_whenUserExists_thenUserAuthorizationSucceeds() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
-        MockHttpServletResponse response = performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performRegistration(USERNAME, PASSWORD, null);
+        MockHttpServletResponse response = testHelper.performAuthorization(USERNAME, PASSWORD, null);
         var authResponse = gson.fromJson(response.getContentAsString(), UserAuthorizationResponse.class);
 
         assertEquals(USERNAME, authResponse.username());
@@ -91,128 +84,22 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void authorizeUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReAuth() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
-        MockHttpServletResponse firstAuthResponse = performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performRegistration(USERNAME, PASSWORD, null);
+        MockHttpServletResponse firstAuthResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse secondAuthResponse = performAuthorization(USERNAME, PASSWORD, firstAuthResponse.getCookies());
-        var errorResponse = gson.fromJson(secondAuthResponse.getContentAsString(), ErrorResponse.class);
+        MockHttpServletResponse secondAuthResponse = testHelper.performAuthorization(USERNAME, PASSWORD, firstAuthResponse.getCookies());
 
-        assertEquals(ACCESS_DENIED, errorResponse.message());
-        assertEquals(403, secondAuthResponse.getStatus());
+        testHelper.checkErrorResponse(secondAuthResponse, ACCESS_DENIED, 403);
     }
 
     @Test
     void authorizeUser_whenInvalidCredentials_thenReturnBadCredentialsError() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
+        testHelper.performRegistration(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse response = performAuthorization(USERNAME, PASSWORD + "1", null);
-        var errorResponse = gson.fromJson(response.getContentAsString(), ErrorResponse.class);
+        MockHttpServletResponse response = testHelper.performAuthorization(USERNAME, PASSWORD + "1", null);
 
-        assertEquals(BAD_CREDENTIALS, errorResponse.message());
-        assertEquals(401, response.getStatus());
+        testHelper.checkErrorResponse(response, BAD_CREDENTIALS, 401);
     }
-
-
-    @Test
-    void getUserMe_whenUserAuthorized_thenGetUserMeInfo() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
-        MockHttpServletResponse authResponse = performAuthorization(USERNAME, PASSWORD, null);
-
-        MockHttpServletResponse meResponse = performGetMe(authResponse.getCookies());
-        var meInfo = gson.fromJson(meResponse.getContentAsString(), UserAuthorizationResponse.class);
-
-        assertEquals(USERNAME, meInfo.username());
-        assertEquals(200, meResponse.getStatus());
-    }
-
-    @Test
-    void getUserMe_whenUserUnauthorized_thenReturnUnauthorizedError() throws Exception {
-        MockHttpServletResponse response = performGetMe(null);
-        var errorResponse = gson.fromJson(response.getContentAsString(), ErrorResponse.class);
-
-        assertEquals(UNAUTHORIZED, errorResponse.message());
-        assertEquals(401, response.getStatus());
-    }
-
-    @Test
-    void signOutUser_whenUserLogsOut_thenAccessDeniedAfterLogout() throws Exception {
-        performRegistration(USERNAME, PASSWORD, null);
-        MockHttpServletResponse authResponse = performAuthorization(USERNAME, PASSWORD, null);
-        performGetMe(authResponse.getCookies());
-        MockHttpServletResponse logoutResponse = performSignOut(authResponse.getCookies());
-
-        MockHttpServletResponse meResponse = performGetMe(logoutResponse.getCookies());
-        var errorResponse = gson.fromJson(meResponse.getContentAsString(), ErrorResponse.class);
-
-        assertEquals(UNAUTHORIZED, errorResponse.message());
-        assertEquals(401, meResponse.getStatus());
-    }
-
-    private MockHttpServletResponse performRegistration(String username, String password, Cookie[] cookies) throws Exception {
-        UserRegistrationRequest request = new UserRegistrationRequest(username, password);
-
-        MockHttpServletRequestBuilder builder = post(AUTH_SIGN_UP_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8)
-                .content(gson.toJson(request));
-
-        if (cookies != null && cookies.length > 0) {
-            builder.cookie(cookies);
-        }
-
-        return mockMvc.perform(builder)
-                .andReturn()
-                .getResponse();
-    }
-
-    private MockHttpServletResponse performAuthorization(String username, String password, Cookie[] cookies) throws Exception {
-        UserAuthorizationRequest request = new UserAuthorizationRequest(username, password);
-
-        MockHttpServletRequestBuilder builder = post(AUTH_SIGN_IN_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8)
-                .content(gson.toJson(request));
-
-        if (cookies != null && cookies.length > 0) {
-            builder.cookie(cookies);
-        }
-
-        return mockMvc.perform(builder)
-                .andReturn()
-                .getResponse();
-    }
-
-    private MockHttpServletResponse performSignOut(Cookie[] cookies) throws Exception {
-        MockHttpServletRequestBuilder builder = post(AUTH_SIGN_OUT_URL)
-                .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8);
-
-        if (cookies != null && cookies.length > 0) {
-            builder.cookie(cookies);
-        }
-
-        return mockMvc.perform(builder)
-                .andReturn()
-                .getResponse();
-    }
-
-    private MockHttpServletResponse performGetMe(Cookie[] cookies) throws Exception {
-        MockHttpServletRequestBuilder builder = get(USER_ME_URL)
-                .accept(MediaType.APPLICATION_JSON)
-                .characterEncoding(StandardCharsets.UTF_8);
-
-        if (cookies != null && cookies.length > 0) {
-            builder.cookie(cookies);
-        }
-
-        return mockMvc.perform(builder)
-                .andReturn()
-                .getResponse();
-    }
-
-
 }
 
 
