@@ -8,11 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.masnaviev.cloudfile.user.dto.response.UserMeResponse;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.USER_ME_URL;
+
 @RestController
-@RequestMapping(("/api/user/"))
+@RequestMapping
 class UserController {
 
-    @GetMapping("me")
+    @GetMapping(USER_ME_URL)
     public ResponseEntity<?> me(@AuthenticationPrincipal UserDetails userDetails) {
         UserMeResponse response = new UserMeResponse(userDetails.getUsername());
         return ResponseEntity.ok().body(response);

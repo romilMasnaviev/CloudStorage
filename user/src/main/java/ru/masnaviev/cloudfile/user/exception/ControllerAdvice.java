@@ -12,6 +12,8 @@ import ru.masnaviev.cloudfile.user.exception.custom.UserAlreadyExistsException;
 
 import java.util.NoSuchElementException;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.UNDEFINED_VALIDATION_ERROR;
+
 @RestControllerAdvice
 public class ControllerAdvice {
 
@@ -22,7 +24,7 @@ public class ControllerAdvice {
                 .stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)
-                .orElse("Validation error");
+                .orElse(UNDEFINED_VALIDATION_ERROR);
 
         return new ResponseEntity<>(new ErrorResponse(message), exception.getStatusCode());
     }

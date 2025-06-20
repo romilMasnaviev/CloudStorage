@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
+
 @Configuration
 @RequiredArgsConstructor
 class CustomSecurityConfiguration {
@@ -41,10 +43,10 @@ class CustomSecurityConfiguration {
                 .sessionManagement(configurer -> configurer
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/sign-up").anonymous()
-                        .requestMatchers("/api/auth/sign-in").anonymous()
-                        .requestMatchers("/api/auth/sign-out").authenticated()
-                        .requestMatchers("/api/user/me").authenticated()
+                        .requestMatchers(AUTH_SIGN_UP_URL).anonymous()
+                        .requestMatchers(AUTH_SIGN_IN_URL).anonymous()
+                        .requestMatchers(AUTH_SIGN_OUT_URL).authenticated()
+                        .requestMatchers(USER_ME_URL).authenticated()
                         .anyRequest().denyAll())
                 .build();
     }

@@ -10,13 +10,15 @@ import ru.masnaviev.cloudfile.user.exception.ErrorResponse;
 
 import java.io.IOException;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.ACCESS_DENIED;
+
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json");
-        ErrorResponse errorResponse = new ErrorResponse("Access Denied");
+        ErrorResponse errorResponse = new ErrorResponse(ACCESS_DENIED);
         String jsonErrorResponse = new Gson().toJson(errorResponse);
 
         response.getWriter().write(jsonErrorResponse);

@@ -10,13 +10,15 @@ import ru.masnaviev.cloudfile.user.exception.ErrorResponse;
 
 import java.io.IOException;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.UNAUTHORIZED;
+
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        ErrorResponse errorResponse = new ErrorResponse("Unauthorized");
+        ErrorResponse errorResponse = new ErrorResponse(UNAUTHORIZED);
         String jsonErrorResponse = new Gson().toJson(errorResponse);
 
         response.getWriter().write(jsonErrorResponse);

@@ -16,27 +16,29 @@ import ru.masnaviev.cloudfile.user.dto.response.UserRegistrationResponse;
 import ru.masnaviev.cloudfile.user.service.AuthService;
 import ru.masnaviev.cloudfile.user.service.UserService;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
+
 @RestController
-@RequestMapping("/api/auth/")
+@RequestMapping
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class AuthController {
     private final AuthService authService;
     private final UserService userService;
 
-    @PostMapping("sign-up")
+    @PostMapping(AUTH_SIGN_UP_URL)
     public ResponseEntity<?> registration(@RequestBody @Valid UserRegistrationRequest request) {
         UserRegistrationResponse response = userService.registration(request);
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("sign-in")
+    @PostMapping(AUTH_SIGN_IN_URL)
     public ResponseEntity<?> authorization(@RequestBody @Valid UserAuthorizationRequest request,
                                            HttpServletRequest servletRequest) {
         UserAuthorizationResponse response = authService.authorization(request, servletRequest);
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("sign-out")
+    @PostMapping(AUTH_SIGN_OUT_URL)
     public ResponseEntity<?> logout(HttpServletRequest servletRequest) {
         authService.logout(servletRequest);
         return ResponseEntity.noContent().build();

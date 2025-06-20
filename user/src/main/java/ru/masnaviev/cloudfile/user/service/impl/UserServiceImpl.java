@@ -12,6 +12,8 @@ import ru.masnaviev.cloudfile.user.model.User;
 import ru.masnaviev.cloudfile.user.repository.UserRepository;
 import ru.masnaviev.cloudfile.user.service.UserService;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.USER_ALREADY_EXISTS;
+
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class UserServiceImpl implements UserService {
@@ -22,7 +24,7 @@ class UserServiceImpl implements UserService {
     @Transactional
     public UserRegistrationResponse registration(UserRegistrationRequest request) {
         if (userRepository.existsByUsername(request.username())) {
-            throw new UserAlreadyExistsException("User with this username already exists");
+            throw new UserAlreadyExistsException(USER_ALREADY_EXISTS);
         }
         User savedUser = userRepository.save(createUser(request));
         return new UserRegistrationResponse(savedUser.getUsername());
