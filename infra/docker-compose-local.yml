@@ -1,0 +1,34 @@
+version: '3.8'
+# Only Postgres, Redis. for user app use application-local.properties
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks:
+      - cloud-storage-network
+
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - rs_data:/var/lib/redis/data
+    networks:
+      - cloud-storage-network
+
+networks:
+  cloud-storage-network:
+
+volumes:
+  data:
+  rs_data:
