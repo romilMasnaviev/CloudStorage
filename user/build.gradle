@@ -24,6 +24,7 @@ ext {
     lombokVersion = '1.18.38'
     redistestContainerVersion = '1.6.4'
     testContainersVersion = '1.21.1'
+    springdocVersion = '2.8.9'
 }
 
 dependencies {
@@ -47,7 +48,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
 
-    //Test
+    // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -55,6 +56,9 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:${testContainersVersion}")
     testImplementation("org.testcontainers:postgresql:${testContainersVersion}")
     implementation("com.redis.testcontainers:testcontainers-redis:${redistestContainerVersion}")
+
+    // Documentation
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}")
 }
 
 test {
