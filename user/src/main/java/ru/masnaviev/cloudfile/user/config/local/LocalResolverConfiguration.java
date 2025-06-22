@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudfile.user.config;
+package ru.masnaviev.cloudfile.user.config.local;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
