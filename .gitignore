@@ -11,3 +11,5 @@ gradle
 Thumbs.db
 
 *.png
+
+infra/.env
