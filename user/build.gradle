@@ -25,6 +25,7 @@ ext {
     redistestContainerVersion = '1.6.4'
     testContainersVersion = '1.21.1'
     springdocVersion = '2.8.9'
+    minioVersion = '8.5.17'
 }
 
 dependencies {
@@ -39,6 +40,7 @@ dependencies {
 
     // Db
     runtimeOnly 'org.postgresql:postgresql'
+    implementation("io.minio:minio:${minioVersion}")
 
     // Migrations
     implementation("org.flywaydb:flyway-core:${flywayVersion}")
