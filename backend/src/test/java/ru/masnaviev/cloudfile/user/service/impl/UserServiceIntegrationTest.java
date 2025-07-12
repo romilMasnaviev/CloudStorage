@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.masnaviev.cloudfile.user.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.user.dto.request.UserRegistrationRequest;
 import ru.masnaviev.cloudfile.user.dto.response.UserRegistrationResponse;
-import ru.masnaviev.cloudfile.user.exception.custom.UserAlreadyExistsException;
+import ru.masnaviev.cloudfile.user.exception.user.UserAlreadyExistsException;
 import ru.masnaviev.cloudfile.user.repository.UserRepository;
 import ru.masnaviev.cloudfile.user.service.UserService;
 

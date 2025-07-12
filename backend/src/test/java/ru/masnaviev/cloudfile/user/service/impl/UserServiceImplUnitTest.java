@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.masnaviev.cloudfile.user.dto.request.UserRegistrationRequest;
 import ru.masnaviev.cloudfile.user.dto.response.UserRegistrationResponse;
-import ru.masnaviev.cloudfile.user.exception.custom.UserAlreadyExistsException;
+import ru.masnaviev.cloudfile.user.exception.user.UserAlreadyExistsException;
 import ru.masnaviev.cloudfile.user.model.User;
 import ru.masnaviev.cloudfile.user.repository.UserRepository;
 

@@ -5,6 +5,7 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -18,6 +19,8 @@ import java.security.NoSuchAlgorithmException;
 class ClientConfiguration {
 
     private final Environment env;
+    @Value("${minio.bucket.name}")
+    private String minioBucketName;
 
     @Bean
     MinioClient minioClient() {
@@ -26,7 +29,7 @@ class ClientConfiguration {
                 .credentials(env.getProperty("minio.username"), env.getProperty("minio.password"))
                 .build();
 
-        createBucketForFiles(env.getProperty("minio.bucket.name"), client);
+        createBucketForFiles(minioBucketName, client);
 
         return client;
     }
