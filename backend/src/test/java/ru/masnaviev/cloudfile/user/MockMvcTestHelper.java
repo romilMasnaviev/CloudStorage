@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import ru.masnaviev.cloudfile.user.dto.request.UserAuthorizationRequest;
-import ru.masnaviev.cloudfile.user.dto.request.UserRegistrationRequest;
+import ru.masnaviev.cloudfile.user.dto.request.user.UserAuthorizationRequest;
+import ru.masnaviev.cloudfile.user.dto.request.user.UserRegistrationRequest;
 import ru.masnaviev.cloudfile.user.exception.ErrorResponse;
 
 import java.io.UnsupportedEncodingException;

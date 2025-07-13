@@ -6,8 +6,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.masnaviev.cloudfile.user.dto.request.UserAuthorizationRequest;
-import ru.masnaviev.cloudfile.user.dto.request.UserRegistrationRequest;
+import ru.masnaviev.cloudfile.user.dto.request.user.UserAuthorizationRequest;
+import ru.masnaviev.cloudfile.user.dto.request.user.UserRegistrationRequest;
 
 import java.util.Set;
 

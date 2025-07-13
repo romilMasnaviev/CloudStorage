@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudfile.user.dto.response;
+package ru.masnaviev.cloudfile.user.dto.response.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

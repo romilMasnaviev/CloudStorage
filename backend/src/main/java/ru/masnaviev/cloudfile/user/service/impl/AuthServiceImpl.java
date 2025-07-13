@@ -10,8 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import ru.masnaviev.cloudfile.user.dto.request.UserAuthorizationRequest;
-import ru.masnaviev.cloudfile.user.dto.response.UserAuthorizationResponse;
+import ru.masnaviev.cloudfile.user.dto.request.user.UserAuthorizationRequest;
+import ru.masnaviev.cloudfile.user.dto.response.user.UserAuthorizationResponse;
 import ru.masnaviev.cloudfile.user.service.AuthService;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;

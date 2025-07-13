@@ -13,8 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.masnaviev.cloudfile.user.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.user.MockMvcHelperConfig;
 import ru.masnaviev.cloudfile.user.MockMvcTestHelper;
-import ru.masnaviev.cloudfile.user.dto.response.UserAuthorizationResponse;
-import ru.masnaviev.cloudfile.user.dto.response.UserRegistrationResponse;
+import ru.masnaviev.cloudfile.user.dto.response.user.UserAuthorizationResponse;
+import ru.masnaviev.cloudfile.user.dto.response.user.UserRegistrationResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.masnaviev.cloudfile.user.TestData.PASSWORD;

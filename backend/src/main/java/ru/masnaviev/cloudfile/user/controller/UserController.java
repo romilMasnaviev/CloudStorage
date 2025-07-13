@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.masnaviev.cloudfile.user.dto.response.UserMeResponse;
+import ru.masnaviev.cloudfile.user.dto.response.user.UserMeResponse;
 import ru.masnaviev.cloudfile.user.exception.ErrorResponse;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.USER_ME_URL;
