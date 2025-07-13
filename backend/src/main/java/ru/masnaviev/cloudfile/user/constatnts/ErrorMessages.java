@@ -19,7 +19,7 @@ public class ErrorMessages {
 
     //Minio
     public static final String FILE_READ_ERROR = "File read error";
-    public static final String FILE_ALREADY_EXISTS = "File already exists";
+    public static final String FILE_ALREADY_EXIST = "File already exist";
     public static final String FILE_MUST_BE_INCLUDED_IN_REQUEST = "Files must be included in the request";
     public static final String UNEXPECTED_FILE_UPLOAD_EXCEPTION = "File upload failed exception";
     public static final String UNEXPECTED_FILE_EXISTS_CHECKING_ERROR = "Error checking the existence of the file";

@@ -43,6 +43,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void registerUser_whenValidData_thenUserRegistrationSucceeds() throws Exception {
         MockHttpServletResponse response = testHelper.performRegistration(USERNAME, PASSWORD, null);
+
         var registrationResponse = gson.fromJson(response.getContentAsString(), UserRegistrationResponse.class);
 
         assertEquals(USERNAME, registrationResponse.username());
@@ -53,7 +54,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     void registerUser_whenUserAlreadyExists_thenReturnErrorMessage() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse response = testHelper.performRegistration(USERNAME, PASSWORD, null);
+        var response = testHelper.performRegistration(USERNAME, PASSWORD, null);
 
         testHelper.checkErrorResponse(response, USER_ALREADY_EXISTS, 409);
     }
@@ -63,7 +64,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse authResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse reRegisterResponse = testHelper.performRegistration(USERNAME, PASSWORD, authResponse.getCookies());
+        var reRegisterResponse = testHelper.performRegistration(USERNAME, PASSWORD, authResponse.getCookies());
 
         testHelper.checkErrorResponse(reRegisterResponse, ACCESS_DENIED, 403);
     }
@@ -72,6 +73,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     void authorizeUser_whenUserExists_thenUserAuthorizationSucceeds() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse response = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+
         var authResponse = gson.fromJson(response.getContentAsString(), UserAuthorizationResponse.class);
 
         assertEquals(USERNAME, authResponse.username());
@@ -83,7 +85,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse firstAuthResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse secondAuthResponse = testHelper.performAuthorization(USERNAME, PASSWORD, firstAuthResponse.getCookies());
+        var secondAuthResponse = testHelper.performAuthorization(USERNAME, PASSWORD, firstAuthResponse.getCookies());
 
         testHelper.checkErrorResponse(secondAuthResponse, ACCESS_DENIED, 403);
     }
@@ -92,7 +94,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     void authorizeUser_whenInvalidCredentials_thenReturnBadCredentialsError() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
 
-        MockHttpServletResponse response = testHelper.performAuthorization(USERNAME, PASSWORD + "1", null);
+        var response = testHelper.performAuthorization(USERNAME, PASSWORD + "1", null);
 
         testHelper.checkErrorResponse(response, BAD_CREDENTIALS, 401);
     }

@@ -2,6 +2,7 @@ package ru.masnaviev.cloudfile.user.service.impl;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import ru.masnaviev.cloudfile.user.model.User;
 import ru.masnaviev.cloudfile.user.repository.UserRepository;
 import ru.masnaviev.cloudfile.user.service.UserService;
 
+import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.USERNAME_NOT_FOUND;
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.USER_ALREADY_EXISTS;
 
 @Service
@@ -28,6 +30,12 @@ class UserServiceImpl implements UserService {
         }
         User savedUser = userRepository.save(createUser(request));
         return new UserRegistrationResponse(savedUser.getUsername());
+    }
+
+    public Long getIdByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() ->
+                new UsernameNotFoundException(USERNAME_NOT_FOUND));
+        return user.getId();
     }
 
     private User createUser(UserRegistrationRequest request) {

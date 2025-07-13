@@ -5,4 +5,6 @@ import ru.masnaviev.cloudfile.user.dto.response.user.UserRegistrationResponse;
 
 public interface UserService {
     UserRegistrationResponse registration(UserRegistrationRequest request);
+
+    Long getIdByUsername(String username);
 }
