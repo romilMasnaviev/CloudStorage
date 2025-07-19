@@ -1,25 +1,30 @@
 package ru.masnaviev.cloudfile.user.service;
 
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.StatObjectArgs;
-import io.minio.errors.ErrorResponseException;
+import io.minio.*;
+import io.minio.errors.*;
+import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import ru.masnaviev.cloudfile.user.dto.response.storage.Type;
-import ru.masnaviev.cloudfile.user.dto.response.storage.UploadedFile;
-import ru.masnaviev.cloudfile.user.exception.storage.FileAlreadyExistsException;
-import ru.masnaviev.cloudfile.user.exception.storage.FileReadException;
-import ru.masnaviev.cloudfile.user.util.NormalizedPathData;
+import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceInfoResponse;
+import ru.masnaviev.cloudfile.user.dto.response.resource.UploadedResource;
+import ru.masnaviev.cloudfile.user.exception.resource.FileAlreadyExistsException;
+import ru.masnaviev.cloudfile.user.exception.resource.FileReadException;
+import ru.masnaviev.cloudfile.user.exception.resource.PathNotFoundException;
+import ru.masnaviev.cloudfile.user.exception.resource.ResourceNotFoundException;
+import ru.masnaviev.cloudfile.user.util.NormalizedResourceData;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.*;
+import static ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType.DIRECTORY;
+import static ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType.FILE;
 
 @Component
 @RequiredArgsConstructor
@@ -30,21 +35,95 @@ public class S3FileService {
     @Value("${minio.bucket.name}")
     private String minioBucketName;
 
-    public List<UploadedFile> uploadFiles(String path, List<MultipartFile> files, Long userId) {
+    public ResourceInfoResponse getResourceInfo(Long userId, String path) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
 
-        List<UploadedFile> uploadedFiles = new ArrayList<>();
+        NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        for (MultipartFile file : files) {
-            var pathData = new NormalizedPathData(userId, path, file.getOriginalFilename());
-            checkFileAlreadyExists(pathData.getFullPath());
-            UploadedFile uploadedFile = uploadFile(pathData, file);
-            uploadedFiles.add(uploadedFile);
-        }
+        checkPathExists(resourceData);
 
-        return uploadedFiles;
+        return resourceData.getResourceType() == DIRECTORY ?
+                getFolderInfo(resourceData) :
+                getFileInfo(resourceData);
     }
 
-    private UploadedFile uploadFile(NormalizedPathData path, MultipartFile file) {
+    private ResourceInfoResponse getFolderInfo(NormalizedResourceData resourceData) {
+        Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
+                .bucket(minioBucketName)
+                .prefix(resourceData.getFullPath())
+                .maxKeys(1)
+                .build());
+
+        if (results.iterator().hasNext()) {
+            return ResourceInfoResponse.builder()
+                    .path(resourceData.getPathWithoutUsernameAndFilename())
+                    .name(resourceData.getResourceName())
+                    .size(null)
+                    .resourceType(DIRECTORY)
+                    .build();
+        } else {
+            throw new ResourceNotFoundException(RESOURCE_NOT_FOUND);
+        }
+    }
+
+    private ResourceInfoResponse getFileInfo(NormalizedResourceData resourceData) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+
+        StatObjectResponse response = client.statObject(StatObjectArgs.builder()
+                .bucket(minioBucketName)
+                .object(resourceData.getFullPath())
+                .build());
+
+        return ResourceInfoResponse.builder()
+                .path(resourceData.getPathWithoutUsernameAndFilename())
+                .name(resourceData.getResourceName())
+                .size(response.size())
+                .resourceType(FILE)
+                .build();
+    }
+
+    private void checkPathExists(NormalizedResourceData resourceData) {
+        Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
+                .bucket(minioBucketName)
+                .prefix(resourceData.getPathWithoutFilename())
+                .maxKeys(1)
+                .build());
+        if (!results.iterator().hasNext()) {
+            throw new PathNotFoundException(PATH_NOT_FOUND);
+        }
+    }
+
+
+    public List<UploadedResource> uploadResources(Long userId, String path, List<MultipartFile> files) {
+
+        List<UploadedResource> uploadedResources = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+//            var pathData = new NormalizedPathData(userId, path, file.getOriginalFilename());
+//            checkFileAlreadyExists(pathData.getFullPath());
+//            UploadedResource uploadedResource = uploadFile(pathData, file);
+//            uploadedResources.add(uploadedResource);
+        }
+        //TODO возврат созданных папок
+
+        return uploadedResources;
+    }
+
+    private UploadedResource uploadFile(NormalizedResourceData path, MultipartFile file) {
         try (var inputStream = new BufferedInputStream(file.getInputStream())) {
             client.putObject((PutObjectArgs.builder()
                     .bucket(minioBucketName)
@@ -52,12 +131,13 @@ public class S3FileService {
                     .stream(inputStream, -1, 100 * 1024 * 1024)
                     .build()));
 
-            return new UploadedFile(path.getPath(), path.getFilename(), file.getSize(), Type.FILE);
+//            return new UploadedResource(path.getPath(), path.getFilename(), file.getSize(), Type.FILE);
         } catch (IOException ex) {
             throw new FileReadException(FILE_READ_ERROR, ex);
         } catch (Exception ex) {
             throw new RuntimeException(UNEXPECTED_FILE_UPLOAD_EXCEPTION, ex);
         }
+        return null;
     }
 
     private void checkFileAlreadyExists(String fullFilePath) {
