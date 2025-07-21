@@ -3,8 +3,9 @@ package ru.masnaviev.cloudfile.user.util;
 import lombok.Data;
 import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType.DIRECTORY;
 import static ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType.FILE;
@@ -31,6 +32,7 @@ public class NormalizedResourceData {
         parseUserFolder(userId);
         parseFoldersAndResourceName(path);
         createFullPath();
+        System.out.println(this);
     }
 
     @Override
@@ -56,7 +58,7 @@ public class NormalizedResourceData {
         } else {
             path = String.join("/", userFolder, String.join("/", folders), resourceName);
         }
-        if (resourceType == DIRECTORY) {
+        if (resourceType == DIRECTORY && !folders.isEmpty()) {
             fullPath = path + "/";
         } else {
             fullPath = path;
@@ -68,7 +70,8 @@ public class NormalizedResourceData {
     }
 
     public String getPathWithoutFilename() {
-        return userFolder + "/" + (folders.isEmpty() ? "/" : String.join("/", folders) + "/");
+        return String.join("/", userFolder, String.join("/", folders));
+
     }
 
     private void parseFoldersAndResourceName(String path) {
@@ -78,20 +81,20 @@ public class NormalizedResourceData {
                 String pathWithoutSlashAtEnd = path.substring(0, path.length() - 1);
                 resourceName = pathWithoutSlashAtEnd.substring(pathWithoutSlashAtEnd.lastIndexOf("/") + 1);
                 String pathWithoutResourceName = pathWithoutSlashAtEnd.substring(0, pathWithoutSlashAtEnd.lastIndexOf("/"));
-                folders = List.of(pathWithoutResourceName.split("/"));
+                folders = Arrays.stream(pathWithoutResourceName.split("/")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
             } else {
                 resourceName = path.substring(0, path.length() - 1);
-                folders = Collections.emptyList();
+                folders = List.of();
             }
         } else {
             resourceType = FILE;
             if (path.contains("/")) {
                 resourceName = path.substring(path.lastIndexOf("/") + 1);
                 String pathWithoutResourceName = path.substring(0, path.lastIndexOf("/"));
-                folders = List.of(pathWithoutResourceName.split("/"));
+                folders = Arrays.stream(pathWithoutResourceName.split("/")).filter(s -> !s.isEmpty()).collect(Collectors.toList());
             } else {
                 resourceName = path;
-                folders = Collections.emptyList();
+                folders = List.of();
             }
         }
     }

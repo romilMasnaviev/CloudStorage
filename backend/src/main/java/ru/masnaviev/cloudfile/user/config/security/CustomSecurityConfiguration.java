@@ -47,7 +47,7 @@ class CustomSecurityConfiguration {
                         .requestMatchers(AUTH_SIGN_IN_URL).anonymous()
                         .requestMatchers(AUTH_SIGN_OUT_URL).authenticated()
                         .requestMatchers(USER_ME_URL).authenticated()
-                        .requestMatchers(UPLOAD).authenticated()
+                        .requestMatchers(UPLOAD_RESOURCE).authenticated()
                         .requestMatchers(SWAGGER_AUTH_WHITELIST).permitAll()
                         .anyRequest().denyAll())
                 .build();

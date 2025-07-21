@@ -7,8 +7,9 @@ public class ApiPath {
 
     public static final String USER_ME_URL = "/api/user/me";
 
-    public static final String GET_INFO = "/api/resource";
-    public static final String UPLOAD = "/api/resource";
+    public static final String GET_RESOURCE_INFO = "/api/resource";
+    public static final String DELETE_RESOURCE = "/api/resource";
+    public static final String UPLOAD_RESOURCE = "/api/resource";
 
     public static final String[] SWAGGER_AUTH_WHITELIST = new String[]{"/v3/api-docs*/**", "/swagger-ui/**"};
 

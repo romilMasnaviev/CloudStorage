@@ -2,7 +2,9 @@ package ru.masnaviev.cloudfile.user.dto.response.resource;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 @Builder
 @Getter

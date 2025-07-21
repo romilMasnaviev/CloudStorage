@@ -10,9 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.masnaviev.cloudfile.user.exception.resource.FileAlreadyExistsException;
-import ru.masnaviev.cloudfile.user.exception.resource.PathNotFoundException;
-import ru.masnaviev.cloudfile.user.exception.resource.ResourceNotFoundException;
+import ru.masnaviev.cloudfile.user.exception.resource.*;
 import ru.masnaviev.cloudfile.user.exception.user.UserAlreadyExistsException;
 
 import java.io.IOException;
@@ -79,6 +77,16 @@ public class ControllerAdvice {
     @ExceptionHandler(PathNotFoundException.class)
     public ResponseEntity<ErrorResponse> pathNotFoundExceptionHandler(PathNotFoundException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(400));
+    }
+
+    @ExceptionHandler(DirectoryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> directoryNotFoundExceptionHandler(DirectoryNotFoundException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(404));
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ResponseEntity<ErrorResponse> fileNotFoundExceptionHandler(FileNotFoundException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(404));
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
