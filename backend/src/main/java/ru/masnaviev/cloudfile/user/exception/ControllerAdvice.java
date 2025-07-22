@@ -89,6 +89,16 @@ public class ControllerAdvice {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(404));
     }
 
+    @ExceptionHandler(DirectoryAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> directoryAlreadyExistsExceptionHandler(DirectoryAlreadyExistsException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(409));
+    }
+
+    @ExceptionHandler(PathMustEndWithSlashException.class)
+    public ResponseEntity<ErrorResponse> pathMustEndWithSlashExceptionHandler(PathMustEndWithSlashException exception) {
+        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(400));
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler({
             ServerException.class,

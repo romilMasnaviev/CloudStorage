@@ -58,7 +58,7 @@ public class NormalizedResourceData {
         } else {
             path = String.join("/", userFolder, String.join("/", folders), resourceName);
         }
-        if (resourceType == DIRECTORY && !folders.isEmpty()) {
+        if (resourceType == DIRECTORY) {
             fullPath = path + "/";
         } else {
             fullPath = path;

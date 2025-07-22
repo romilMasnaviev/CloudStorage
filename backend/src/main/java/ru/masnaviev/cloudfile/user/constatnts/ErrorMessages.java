@@ -21,12 +21,16 @@ public class ErrorMessages {
     //Minio
     public static final String MINIO_EXCEPTION = "Minio exception";
     public static final String FILE_READ_ERROR = "File read error";
-    public static final String FILE_ALREADY_EXIST = "File already exist";
+    public static final String FILE_ALREADY_EXIST = "File already exists";
+    public static final String DIRECTORY_ALREADY_EXISTS = "Directory already exists";
     public static final String FILE_MUST_BE_INCLUDED_IN_REQUEST = "Files must be included in the request";
+
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
     public static final String PATH_NOT_FOUND = "Path not found";
+    public static final String PARENT_DIRECTORY_NOT_FOUND = "Parent directory not found";
     public static final String DIRECTORY_NOT_FOUND = "Directory not found";
     public static final String FILE_NOT_FOUND = "File not found";
+
     public static final String UNEXPECTED_FILE_UPLOAD_EXCEPTION = "File upload failed exception";
     public static final String UNEXPECTED_FILE_EXISTS_CHECKING_ERROR = "Error checking the existence of the file";
     public static final String PATH_MUST_BE_END_SLASH = "Path must end with the character '/'";

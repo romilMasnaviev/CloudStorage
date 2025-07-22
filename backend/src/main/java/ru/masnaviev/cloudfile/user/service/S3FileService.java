@@ -7,15 +7,15 @@ import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceInfoResponse;
-import ru.masnaviev.cloudfile.user.exception.resource.DirectoryNotFoundException;
-import ru.masnaviev.cloudfile.user.exception.resource.FileNotFoundException;
-import ru.masnaviev.cloudfile.user.exception.resource.PathNotFoundException;
-import ru.masnaviev.cloudfile.user.exception.resource.ResourceNotFoundException;
+import ru.masnaviev.cloudfile.user.exception.resource.*;
 import ru.masnaviev.cloudfile.user.util.NormalizedResourceData;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -46,14 +46,112 @@ public class S3FileService {
 
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        checkPathExists(resourceData);
+        if (!checkPathExists(resourceData)) {
+            throw new PathNotFoundException(PATH_NOT_FOUND);
+        }
 
         return resourceData.getResourceType() == DIRECTORY ?
-                getFolderInfo(resourceData) :
+                getDirectoryInfo(resourceData) :
                 getFileInfo(resourceData);
     }
 
-    private ResourceInfoResponse getFolderInfo(NormalizedResourceData resourceData) {
+    public void deleteResource(Long userId, String path) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+
+        NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
+
+        if (!checkPathExists(resourceData)) {
+            throw new PathNotFoundException(PATH_NOT_FOUND);
+        }
+
+        if (resourceData.getResourceType() == DIRECTORY) {
+            if (!checkDirectoryExists(resourceData)) {
+                throw new DirectoryNotFoundException(DIRECTORY_NOT_FOUND);
+            }
+            deleteDirectory(resourceData);
+        } else {
+            if (!checkFileExists(resourceData)) {
+                throw new FileNotFoundException(FILE_NOT_FOUND);
+            }
+            deleteFile(resourceData);
+        }
+    }
+
+    public InputStreamResource downloadResource(Long userId, String path) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+        NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
+
+        if (!checkPathExists(resourceData)) {
+            throw new PathNotFoundException(PATH_NOT_FOUND);
+        }
+
+        if (resourceData.getResourceType() == DIRECTORY) {
+            if (!checkDirectoryExists(resourceData))
+                throw new DirectoryNotFoundException(DIRECTORY_NOT_FOUND);
+
+            return downloadDirectory(resourceData);
+        } else {
+            if (!checkFileExists(resourceData))
+                throw new FileNotFoundException(FILE_NOT_FOUND);
+
+            return downloadFile(resourceData);
+        }
+    }
+
+    public ResourceInfoResponse uploadDirectory(Long userId, String path) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+
+        NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
+
+        if (!resourceData.getFullPath().endsWith("/")) {
+            throw new PathMustEndWithSlashException(PATH_MUST_BE_END_SLASH);
+        }
+
+        if (!checkPathExists(resourceData)) {
+            throw new PathNotFoundException(PARENT_DIRECTORY_NOT_FOUND);
+        }
+
+        if (checkDirectoryExists(resourceData)) {
+            throw new DirectoryAlreadyExistsException(DIRECTORY_ALREADY_EXISTS);
+        }
+
+        client.putObject(PutObjectArgs.builder()
+                .bucket(minioBucketName)
+                .object(resourceData.getFullPath())
+                .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                .build());
+
+        return ResourceInfoResponse.builder()
+                .path(resourceData.getPathWithoutUsernameAndFilename())
+                .name(resourceData.getResourceName())
+                .size(null)
+                .resourceType(DIRECTORY)
+                .build();
+    }
+
+
+    private ResourceInfoResponse getDirectoryInfo(NormalizedResourceData resourceData) {
         Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
                 .bucket(minioBucketName)
                 .prefix(resourceData.getFullPath())
@@ -98,21 +196,7 @@ public class S3FileService {
                 .build();
     }
 
-    public void deleteResource(Long userId, String path) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
-
-        checkPathExists(resourceData);
-
-        if (resourceData.getResourceType() == DIRECTORY) {
-            checkDirectoryExists(resourceData);
-            deleteFolder(resourceData);
-        } else {
-            checkFileExists(resourceData);
-            deleteFile(resourceData);
-        }
-    }
-
-    private void checkDirectoryExists(NormalizedResourceData resourceData) {
+    private boolean checkDirectoryExists(NormalizedResourceData resourceData) {
         Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
                 .bucket(minioBucketName)
                 .prefix(resourceData.getFullPath())
@@ -120,12 +204,10 @@ public class S3FileService {
                 .build());
         results.forEach(r -> {
         });
-        if (!results.iterator().hasNext()) {
-            throw new DirectoryNotFoundException(DIRECTORY_NOT_FOUND);
-        }
+        return results.iterator().hasNext();
     }
 
-    private void checkFileExists(NormalizedResourceData resourceData) {
+    private boolean checkFileExists(NormalizedResourceData resourceData) {
         Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
                 .bucket(minioBucketName)
                 .prefix(resourceData.getFullPath())
@@ -133,12 +215,10 @@ public class S3FileService {
                 .build());
         results.forEach(r -> {
         });
-        if (!results.iterator().hasNext()) {
-            throw new FileNotFoundException(FILE_NOT_FOUND);
-        }
+        return results.iterator().hasNext();
     }
 
-    private void checkPathExists(NormalizedResourceData resourceData) {
+    private boolean checkPathExists(NormalizedResourceData resourceData) {
         Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
                 .bucket(minioBucketName)
                 .prefix(resourceData.getPathWithoutFilename())
@@ -146,20 +226,36 @@ public class S3FileService {
                 .build());
         results.forEach(r -> {
         });
-        if (!results.iterator().hasNext()) {
-            throw new PathNotFoundException(PATH_NOT_FOUND);
-        }
+        return results.iterator().hasNext();
     }
 
 
-    private void deleteFile(NormalizedResourceData resourceData) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    private void deleteFile(NormalizedResourceData resourceData) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+
         client.removeObject(RemoveObjectArgs.builder()
                 .bucket(minioBucketName)
                 .object(resourceData.getFullPath())
                 .build());
     }
 
-    private void deleteFolder(NormalizedResourceData resourceData) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    private void deleteDirectory(NormalizedResourceData resourceData) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+
         List<DeleteObject> deleteObjects = new ArrayList<>();
 
         Iterable<Result<Item>> resourcesForDelete = client.listObjects(ListObjectsArgs.builder()
@@ -182,53 +278,29 @@ public class S3FileService {
         });
     }
 
+    private InputStreamResource downloadDirectory(NormalizedResourceData resourceData) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
 
-//    public List<UploadedResource> uploadResources(Long userId, String path, List<MultipartFile> files) {
-//
-//        List<UploadedResource> uploadedResources = new ArrayList<>();
-//
-//        for (MultipartFile file : files) {
-////            var pathData = new NormalizedPathData(userId, path, file.getOriginalFilename());
-////            checkFileAlreadyExists(pathData.getFullPath());
-////            UploadedResource uploadedResource = uploadFile(pathData, file);
-////            uploadedResources.add(uploadedResource);
-//        }
-//        возврат созданных папок
-//
-//        return uploadedResources;
-//    }
-//
-//    private UploadedResource uploadFile(NormalizedResourceData path, MultipartFile file) {
-//        try (var inputStream = new BufferedInputStream(file.getInputStream())) {
-//            client.putObject((PutObjectArgs.builder()
-//                    .bucket(minioBucketName)
-//                    .object(path.getFullPath())
-//                    .stream(inputStream, -1, 100 * 1024 * 1024)
-//                    .build()));
-//
-////            return new UploadedResource(path.getPath(), path.getFilename(), file.getSize(), Type.FILE);
-//        } catch (IOException ex) {
-//            throw new FileReadException(FILE_READ_ERROR, ex);
-//        } catch (Exception ex) {
-//            throw new RuntimeException(UNEXPECTED_FILE_UPLOAD_EXCEPTION, ex);
-//        }
-//        return null;
-//    }
-//
-//    private void checkFileAlreadyExists(String fullFilePath) {
-//        try {
-//            client.statObject(StatObjectArgs.builder()
-//                    .bucket(minioBucketName)
-//                    .object(fullFilePath)
-//                    .build());
-//            throw new FileAlreadyExistsException(FILE_ALREADY_EXIST);
-//        } catch (ErrorResponseException ex) {
-//            if (!ex.errorResponse().code().equals("NoSuchKey")) {
-//                throw new RuntimeException(ex);
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+        // TODO на данный момент нельзя скачать папку так как я ее не сам создаю. После реализации метода
+        // TODO по созданию пустой папки можно доделать до конца. Также нужно реализовать downloadFile
+        InputStream stream = client.getObject(
+                GetObjectArgs.builder()
+                        .bucket(minioBucketName)
+                        .object(resourceData.getFullPath())
+                        .build());
+        return new InputStreamResource(stream);
+    }
+
+    private InputStreamResource downloadFile(NormalizedResourceData resourceData) {
+        // TODO
+        return null;
+    }
 }
 
