@@ -3,6 +3,7 @@ package ru.masnaviev.cloudfile.user.util;
 import lombok.Data;
 import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,25 +54,47 @@ public class NormalizedResourceData {
 
     private void createFullPath() {
         String path;
+
         if (folders.isEmpty()) {
-            path = String.join("/", userFolder, resourceName);
+            if (resourceName.isEmpty()) {
+                path = userFolder;
+            } else {
+                path = String.join("/", userFolder, resourceName);
+            }
         } else {
             path = String.join("/", userFolder, String.join("/", folders), resourceName);
         }
+
         if (resourceType == DIRECTORY) {
-            fullPath = path + "/";
+            fullPath = path.endsWith("/") ? path : path + "/";
         } else {
             fullPath = path;
         }
     }
 
-    public String getPathWithoutUsernameAndFilename() {
+    public String getPathWithoutUsernameAndResourceName() {
         return folders.isEmpty() ? "/" : String.join("/", folders) + "/";
     }
 
-    public String getPathWithoutFilename() {
+    public String getPathWithoutResourceName() {
         return String.join("/", userFolder, String.join("/", folders));
 
+    }
+
+    public List<String> getPathsList() {
+        List<String> paths = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder().append(userFolder).append("/");
+        for (String folder : folders) {
+            stringBuilder.append(folder).append("/");
+            paths.add(String.valueOf(stringBuilder));
+        }
+        return paths;
+    }
+
+    public static void main(String[] args) {
+        NormalizedResourceData normalizedResourceData = new NormalizedResourceData(3L,"user-3-files/1/2/3/4/5/6/Задание.jpg");
+        System.out.println("normalizedResourceData = " + normalizedResourceData);
+        System.out.println("normalizedResourceData.getPathsList() = " + normalizedResourceData.getPathsList());
     }
 
     private void parseFoldersAndResourceName(String path) {

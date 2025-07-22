@@ -1,5 +1,6 @@
 package ru.masnaviev.cloudfile.user.controller;
 
+import io.minio.errors.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +22,12 @@ import ru.masnaviev.cloudfile.user.dto.response.user.UserAuthorizationResponse;
 import ru.masnaviev.cloudfile.user.dto.response.user.UserRegistrationResponse;
 import ru.masnaviev.cloudfile.user.exception.ErrorResponse;
 import ru.masnaviev.cloudfile.user.service.AuthService;
+import ru.masnaviev.cloudfile.user.service.S3FileService;
 import ru.masnaviev.cloudfile.user.service.UserService;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
 
@@ -31,6 +37,8 @@ import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
 class AuthController {
     private final AuthService authService;
     private final UserService userService;
+    private final S3FileService s3FileService;
+
 
     @Operation(
             summary = "User Registration",
@@ -52,8 +60,18 @@ class AuthController {
     })
     @Tag(name = "authentication")
     @PostMapping(AUTH_SIGN_UP_URL)
-    public ResponseEntity<UserRegistrationResponse> registration(@RequestBody @Valid UserRegistrationRequest request) {
+    public ResponseEntity<UserRegistrationResponse> registration(@RequestBody @Valid UserRegistrationRequest request) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+
         UserRegistrationResponse response = userService.registration(request);
+        s3FileService.createUserDirectory(userService.getIdByUsername(response.username()));
         return ResponseEntity.ok().body(response);
     }
 

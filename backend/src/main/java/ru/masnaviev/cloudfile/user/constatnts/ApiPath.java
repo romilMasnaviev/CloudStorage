@@ -13,6 +13,7 @@ public class ApiPath {
     public static final String UPLOAD_RESOURCE = "/api/resource";
 
     public static final String UPLOAD_DIRECTORY = "/api/directory";
+    public static final String GET_DIRECTORY_CONTENTS_INFO = "/api/directory";
 
     public static final String[] SWAGGER_AUTH_WHITELIST = new String[]{"/v3/api-docs*/**", "/swagger-ui/**"};
 

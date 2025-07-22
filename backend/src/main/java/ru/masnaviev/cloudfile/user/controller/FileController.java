@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceInfoResponse;
 import ru.masnaviev.cloudfile.user.service.S3FileService;
 import ru.masnaviev.cloudfile.user.service.UserService;
@@ -18,6 +19,7 @@ import ru.masnaviev.cloudfile.user.service.UserService;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
@@ -31,7 +33,7 @@ class FileController {
     private final UserService userService;
 
     @GetMapping(GET_RESOURCE_INFO)
-    public ResponseEntity<?> getInfo(
+    public ResponseEntity<?> getResourceInfo(
             @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
             @AuthenticationPrincipal UserDetails userDetails) throws ServerException,
             InsufficientDataException,
@@ -89,8 +91,6 @@ class FileController {
     }
 
 
-
-
     @PostMapping(UPLOAD_DIRECTORY)
     // Путь указывается со слэшем в конце "/"
     public ResponseEntity<?> uploadDirectory(
@@ -111,5 +111,42 @@ class FileController {
         return ResponseEntity.status(201).body(response);
     }
 
+    @GetMapping(GET_DIRECTORY_CONTENTS_INFO)
+    public ResponseEntity<?> getDirectoryContentsInfo(
+            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+        Long userId = userService.getIdByUsername(userDetails.getUsername());
+        List<ResourceInfoResponse> response = service.getDirectoryContentsInfo(userId, path);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @PostMapping(path = UPLOAD_RESOURCE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadResources(
+            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
+            @RequestPart(name = "file") List<MultipartFile> files,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) throws ServerException,
+            InsufficientDataException,
+            ErrorResponseException,
+            IOException,
+            NoSuchAlgorithmException,
+            InvalidKeyException,
+            InvalidResponseException,
+            XmlParserException,
+            InternalException {
+
+        Long userId = userService.getIdByUsername(userDetails.getUsername());
+        List<ResourceInfoResponse> response = service.uploadResources(userId, path, files);
+        return ResponseEntity.ok().body(response);
+    }
 
 }

@@ -50,7 +50,8 @@ class CustomSecurityConfiguration {
                         .requestMatchers(DELETE_RESOURCE).authenticated()
                         .requestMatchers(DOWNLOAD_RESOURCE).authenticated()
                         .requestMatchers(UPLOAD_DIRECTORY).authenticated()
-//                        .requestMatchers(UPLOAD_RESOURCE).authenticated()
+                        .requestMatchers(GET_DIRECTORY_CONTENTS_INFO).authenticated()
+                        .requestMatchers(UPLOAD_RESOURCE).authenticated()
                         .requestMatchers(SWAGGER_AUTH_WHITELIST).permitAll()
                         .anyRequest().denyAll())
                 .build();
