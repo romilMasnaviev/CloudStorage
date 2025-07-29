@@ -36,6 +36,12 @@ public class NormalizedResourceData {
         System.out.println(this);
     }
 
+    public static void main(String[] args) {
+        NormalizedResourceData normalizedResourceData = new NormalizedResourceData(3L, "user-3-files/1/2/3/4/5/6/Задание.jpg");
+        System.out.println("normalizedResourceData = " + normalizedResourceData);
+        System.out.println("normalizedResourceData.getPathsList() = " + normalizedResourceData.getPathsList());
+    }
+
     @Override
     public String toString() {
         return "NormalizedResourceData{" +
@@ -89,12 +95,6 @@ public class NormalizedResourceData {
             paths.add(String.valueOf(stringBuilder));
         }
         return paths;
-    }
-
-    public static void main(String[] args) {
-        NormalizedResourceData normalizedResourceData = new NormalizedResourceData(3L,"user-3-files/1/2/3/4/5/6/Задание.jpg");
-        System.out.println("normalizedResourceData = " + normalizedResourceData);
-        System.out.println("normalizedResourceData.getPathsList() = " + normalizedResourceData.getPathsList());
     }
 
     private void parseFoldersAndResourceName(String path) {

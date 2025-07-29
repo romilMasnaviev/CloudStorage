@@ -1,6 +1,6 @@
 package ru.masnaviev.cloudfile.user.exception;
 
-import io.minio.errors.*;
+import io.minio.errors.ErrorResponseException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.masnaviev.cloudfile.user.exception.resource.*;
 import ru.masnaviev.cloudfile.user.exception.user.UserAlreadyExistsException;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.NoSuchElementException;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.MINIO_EXCEPTION;
@@ -99,18 +96,8 @@ public class ControllerAdvice {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(400));
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler({
-            ServerException.class,
-            InsufficientDataException.class,
-            IOException.class,
-            NoSuchAlgorithmException.class,
-            InvalidKeyException.class,
-            InvalidResponseException.class,
-            XmlParserException.class,
-            InternalException.class
-    })
-    public ResponseEntity<ErrorResponse> minioExceptionHandler(MinioException exception) {
-        return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(500));
+    @ExceptionHandler(MinioOperationException.class)
+    public ResponseEntity<ErrorResponse> handleMinioOperationException(MinioOperationException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(500));
     }
 }

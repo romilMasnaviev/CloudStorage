@@ -1,6 +1,5 @@
 package ru.masnaviev.cloudfile.user.controller;
 
-import io.minio.errors.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +15,6 @@ import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceInfoResponse;
 import ru.masnaviev.cloudfile.user.service.S3FileService;
 import ru.masnaviev.cloudfile.user.service.UserService;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
@@ -35,15 +31,7 @@ class FileController {
     @GetMapping(GET_RESOURCE_INFO)
     public ResponseEntity<?> getResourceInfo(
             @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
-            @AuthenticationPrincipal UserDetails userDetails) throws ServerException,
-            InsufficientDataException,
-            ErrorResponseException,
-            IOException,
-            NoSuchAlgorithmException,
-            InvalidKeyException,
-            InvalidResponseException,
-            XmlParserException,
-            InternalException {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
         ResourceInfoResponse resource = service.getResourceInfo(userId, path);
@@ -54,15 +42,7 @@ class FileController {
     //Если путь указан как "/", удалит все содержимое папки
     public ResponseEntity<?> deleteResource(
             @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
-            @AuthenticationPrincipal UserDetails userDetails) throws ServerException,
-            InsufficientDataException,
-            ErrorResponseException,
-            IOException,
-            NoSuchAlgorithmException,
-            InvalidKeyException,
-            InvalidResponseException,
-            XmlParserException,
-            InternalException {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
         service.deleteResource(userId, path);
@@ -72,16 +52,7 @@ class FileController {
     @GetMapping(DOWNLOAD_RESOURCE)
     public ResponseEntity<?> downloadResource(
             @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) throws ServerException,
-            InsufficientDataException,
-            ErrorResponseException,
-            IOException,
-            NoSuchAlgorithmException,
-            InvalidKeyException,
-            InvalidResponseException,
-            XmlParserException,
-            InternalException {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
         InputStreamResource resource = service.downloadResource(userId, path);
@@ -95,16 +66,7 @@ class FileController {
     // Путь указывается со слэшем в конце "/"
     public ResponseEntity<?> uploadDirectory(
             @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) throws ServerException,
-            InsufficientDataException,
-            ErrorResponseException,
-            IOException,
-            NoSuchAlgorithmException,
-            InvalidKeyException,
-            InvalidResponseException,
-            XmlParserException,
-            InternalException {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
         ResourceInfoResponse response = service.uploadDirectory(userId, path);
@@ -114,16 +76,8 @@ class FileController {
     @GetMapping(GET_DIRECTORY_CONTENTS_INFO)
     public ResponseEntity<?> getDirectoryContentsInfo(
             @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) throws ServerException,
-            InsufficientDataException,
-            ErrorResponseException,
-            IOException,
-            NoSuchAlgorithmException,
-            InvalidKeyException,
-            InvalidResponseException,
-            XmlParserException,
-            InternalException {
+            @AuthenticationPrincipal UserDetails userDetails) {
+
         Long userId = userService.getIdByUsername(userDetails.getUsername());
         List<ResourceInfoResponse> response = service.getDirectoryContentsInfo(userId, path);
         return ResponseEntity.ok().body(response);
@@ -133,16 +87,7 @@ class FileController {
     public ResponseEntity<?> uploadResources(
             @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
             @RequestPart(name = "file") List<MultipartFile> files,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) throws ServerException,
-            InsufficientDataException,
-            ErrorResponseException,
-            IOException,
-            NoSuchAlgorithmException,
-            InvalidKeyException,
-            InvalidResponseException,
-            XmlParserException,
-            InternalException {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
         List<ResourceInfoResponse> response = service.uploadResources(userId, path, files);
