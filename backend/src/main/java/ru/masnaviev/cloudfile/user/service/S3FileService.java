@@ -1,5 +1,6 @@
 package ru.masnaviev.cloudfile.user.service;
 
+import io.minio.ObjectWriteResponse;
 import io.minio.Result;
 import io.minio.StatObjectResponse;
 import io.minio.errors.MinioException;
@@ -33,29 +34,19 @@ public class S3FileService {
     private final MinioRepository repository;
 
     public ResourceInfoResponse getResourceInfo(Long userId, String path) {
-
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        if (!repository.checkResourceExists(resourceData.getPathWithoutResourceName())) {
-            throw new PathNotFoundException(PATH_NOT_FOUND);
-        }
+        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
 
         return getResourceInfo(resourceData);
     }
 
     public void deleteResource(Long userId, String path) {
-
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        if (!repository.checkResourceExists(resourceData.getPathWithoutResourceName())) {
-            throw new PathNotFoundException(PATH_NOT_FOUND);
-        }
-
-        if (!repository.checkResourceExists(resourceData.getFullPath()))
-            throw new ResourceNotFoundException(resourceData.getResourceType() == DIRECTORY ?
-                    DIRECTORY_NOT_FOUND :
-                    FILE_NOT_FOUND);
-
+        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
+        checkResourceExists(resourceData);
+        
         if (resourceData.getResourceType() == DIRECTORY)
             deleteDirectory(resourceData);
         else
@@ -65,14 +56,8 @@ public class S3FileService {
     public InputStreamResource downloadResource(Long userId, String path) {
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        if (!repository.checkResourceExists(resourceData.getPathWithoutResourceName())) {
-            throw new PathNotFoundException(PATH_NOT_FOUND);
-        }
-
-        if (!repository.checkResourceExists(resourceData.getFullPath()))
-            throw new ResourceNotFoundException(resourceData.getResourceType() == DIRECTORY ?
-                    DIRECTORY_NOT_FOUND :
-                    FILE_NOT_FOUND);
+        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
+        checkResourceExists(resourceData);
 
         return resourceData.getResourceType() == DIRECTORY ?
                 downloadDirectory(resourceData) :
@@ -81,22 +66,18 @@ public class S3FileService {
     }
 
     public ResourceInfoResponse uploadDirectory(Long userId, String path) {
-
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
+
+        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
 
         if (!resourceData.getFullPath().endsWith("/")) {
             throw new PathMustEndWithSlashException(PATH_MUST_BE_END_SLASH);
         }
-
-        if (!repository.checkResourceExists(resourceData.getPathWithoutResourceName())) {
-            throw new PathNotFoundException(PARENT_DIRECTORY_NOT_FOUND);
-        }
-
         if (repository.checkResourceExists(resourceData.getFullPath())) {
             throw new DirectoryAlreadyExistsException(DIRECTORY_ALREADY_EXISTS);
         }
 
-        repository.createDirectory(resourceData.getFullPath());
+        repository.uploadDirectory(resourceData.getFullPath());
 
         return ResourceInfoResponse.builder()
                 .path(resourceData.getPathWithoutUsernameAndResourceName())
@@ -107,12 +88,9 @@ public class S3FileService {
     }
 
     public List<ResourceInfoResponse> getDirectoryContentsInfo(Long userId, String path) {
-
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        if (!repository.checkResourceExists(resourceData.getPathWithoutResourceName())) {
-            throw new PathNotFoundException(PATH_NOT_FOUND);
-        }
+        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
 
         Iterable<Result<Item>> results = repository.getResourcesByPrefix(resourceData.getFullPath(), false);
 
@@ -164,7 +142,7 @@ public class S3FileService {
 
             // Создаем папки при необходимости
             for (String pathToCreate : pathsToCreate) {
-                repository.createDirectory(pathToCreate);
+                repository.uploadDirectory(pathToCreate);
                 var normalizedData = new NormalizedResourceData(userId, pathToCreate);
                 responses.add(toResponse(userId, pathToCreate, null, normalizedData));
             }
@@ -249,7 +227,19 @@ public class S3FileService {
         //TODO дублируется folder в NormalizedResourceData, подумать как отрефакторить
         //TODO сделать так чтобы корневую папку нельзя было удалить
         String userFolder = "user-" + userId + "-files" + "/";
-        repository.createDirectory(userFolder);
+        repository.uploadDirectory(userFolder);
     }
 
+    private void checkPathExists(String path, String errorMessage){
+        if(!repository.checkResourceExists(path)){
+            throw new PathNotFoundException(errorMessage);
+        }
+    }
+
+    private void checkResourceExists(NormalizedResourceData resourceData){
+        if (!repository.checkResourceExists(resourceData.getFullPath())){
+            throw new ResourceNotFoundException(resourceData.getResourceType() == DIRECTORY ?
+                    DIRECTORY_NOT_FOUND :
+                    FILE_NOT_FOUND);}
+    }
 }

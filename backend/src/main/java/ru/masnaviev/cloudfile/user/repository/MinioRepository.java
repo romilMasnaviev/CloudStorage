@@ -1,6 +1,7 @@
 package ru.masnaviev.cloudfile.user.repository;
 
 import io.minio.*;
+import io.minio.errors.ErrorResponseException;
 import io.minio.errors.MinioException;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
@@ -25,12 +26,35 @@ public class MinioRepository {
     @Value("${minio.bucket.name}")
     private String minioBucketName;
 
-    public ObjectWriteResponse createDirectory(String path) {
+    public ObjectWriteResponse uploadDirectory(String path) {
         try {
             return client.putObject(PutObjectArgs.builder()
                     .bucket(minioBucketName)
                     .object(path)
                     .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                    .build());
+        } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+            throw new MinioOperationException(e.getMessage(), e.getCause());
+        }
+    }
+
+    public void uploadFile(String path, MultipartFile file) {
+        try {
+            client.putObject(PutObjectArgs.builder()
+                    .bucket(minioBucketName)
+                    .object(path)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .build());
+        } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+            throw new MinioOperationException(e.getMessage(), e.getCause());
+        }
+    }
+
+    public StatObjectResponse getResourceInfo(String path) {
+        try {
+            return client.statObject(StatObjectArgs.builder()
+                    .bucket(minioBucketName)
+                    .object(path)
                     .build());
         } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
             throw new MinioOperationException(e.getMessage(), e.getCause());
@@ -49,16 +73,6 @@ public class MinioRepository {
         return results;
     }
 
-    public Iterable<Result<DeleteError>> deleteResources(Iterable<DeleteObject> deleteObjects) {
-        Iterable<Result<DeleteError>> results = client.removeObjects(RemoveObjectsArgs.builder()
-                .bucket(minioBucketName)
-                .objects(deleteObjects)
-                .build());
-        results.forEach(r -> {
-        });
-        return results;
-    }
-
     public void deleteResource(String path) {
         try {
             client.removeObject(RemoveObjectArgs.builder()
@@ -70,39 +84,29 @@ public class MinioRepository {
         }
     }
 
-    public boolean checkResourceExists(String path) {
-        Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
+    public Iterable<Result<DeleteError>> deleteResources(Iterable<DeleteObject> deleteObjects) {
+        Iterable<Result<DeleteError>> results = client.removeObjects(RemoveObjectsArgs.builder()
                 .bucket(minioBucketName)
-                .prefix(path)
-                .recursive(false)
-                .maxKeys(1)
+                .objects(deleteObjects)
                 .build());
         results.forEach(r -> {
         });
-        return results.iterator().hasNext();
+        return results;
     }
 
-    public StatObjectResponse getResourceInfo(String path) {
+    public boolean checkResourceExists(String path) {
         try {
-            return client.statObject(StatObjectArgs.builder()
+            client.statObject(StatObjectArgs.builder()
                     .bucket(minioBucketName)
                     .object(path)
                     .build());
+        } catch (ErrorResponseException ex) {
+            if (ex.errorResponse().code().equals("NoSuchKey"))
+                return false;
         } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
             throw new MinioOperationException(e.getMessage(), e.getCause());
         }
-    }
-
-    public void uploadFile(String path, MultipartFile file) {
-        try {
-            client.putObject(PutObjectArgs.builder()
-                    .bucket(minioBucketName)
-                    .object(path)
-                    .stream(file.getInputStream(), file.getSize(), -1)
-                    .build());
-        } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
-            throw new MinioOperationException(e.getMessage(), e.getCause());
-        }
+        return true;
     }
 
 }

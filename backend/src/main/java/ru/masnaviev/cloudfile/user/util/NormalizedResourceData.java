@@ -83,8 +83,10 @@ public class NormalizedResourceData {
     }
 
     public String getPathWithoutResourceName() {
-        return String.join("/", userFolder, String.join("/", folders));
-
+        if (folders.isEmpty()) {
+            return userFolder + "/";
+        }
+        return userFolder + "/" + String.join("/", folders) + "/";
     }
 
     public List<String> getPathsList() {
