@@ -1,6 +1,5 @@
 package ru.masnaviev.cloudfile.user.service;
 
-import io.minio.ObjectWriteResponse;
 import io.minio.Result;
 import io.minio.StatObjectResponse;
 import io.minio.errors.MinioException;
@@ -10,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import ru.masnaviev.cloudfile.user.dto.response.resource.DownloadResourceResponse;
 import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceInfoResponse;
 import ru.masnaviev.cloudfile.user.exception.resource.*;
 import ru.masnaviev.cloudfile.user.repository.MinioRepository;
@@ -36,7 +36,7 @@ public class S3FileService {
     public ResourceInfoResponse getResourceInfo(Long userId, String path) {
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
+        checkPathExists(resourceData.getPathWithoutResourceName(), PATH_NOT_FOUND);
 
         return getResourceInfo(resourceData);
     }
@@ -44,31 +44,34 @@ public class S3FileService {
     public void deleteResource(Long userId, String path) {
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
+        checkPathExists(resourceData.getPathWithoutResourceName(), PATH_NOT_FOUND);
         checkResourceExists(resourceData);
-        
+
         if (resourceData.getResourceType() == DIRECTORY)
             deleteDirectory(resourceData);
         else
             repository.deleteResource(resourceData.getFullPath());
     }
 
-    public InputStreamResource downloadResource(Long userId, String path) {
+    public DownloadResourceResponse downloadResource(Long userId, String path) {
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
+        checkPathExists(resourceData.getPathWithoutResourceName(), PATH_NOT_FOUND);
+
         checkResourceExists(resourceData);
 
-        return resourceData.getResourceType() == DIRECTORY ?
-                downloadDirectory(resourceData) :
-                downloadFile(resourceData);
 
+        InputStreamResource resource = resourceData.getResourceType() == DIRECTORY ?
+                downloadDirectory(resourceData) :
+                repository.downloadFile(resourceData.getFullPath());
+
+        return new DownloadResourceResponse(resourceData.getResourceName(), resource);
     }
 
     public ResourceInfoResponse uploadDirectory(Long userId, String path) {
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
+        checkPathExists(resourceData.getPathWithoutResourceName(), PATH_NOT_FOUND);
 
         if (!resourceData.getFullPath().endsWith("/")) {
             throw new PathMustEndWithSlashException(PATH_MUST_BE_END_SLASH);
@@ -90,7 +93,7 @@ public class S3FileService {
     public List<ResourceInfoResponse> getDirectoryContentsInfo(Long userId, String path) {
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
-        checkPathExists(resourceData.getPathWithoutResourceName(),PATH_NOT_FOUND);
+        checkPathExists(resourceData.getPathWithoutResourceName(), PATH_NOT_FOUND);
 
         Iterable<Result<Item>> results = repository.getResourcesByPrefix(resourceData.getFullPath(), false);
 
@@ -204,11 +207,6 @@ public class S3FileService {
                 .build();
     }
 
-    private InputStreamResource downloadFile(NormalizedResourceData resourceData) {
-        // TODO
-        return null;
-    }
-
     private Map<String, Item> toItemMapByPath(Iterable<Result<Item>> results) {
         Map<String, Item> paths = new HashMap<>();
 
@@ -230,16 +228,17 @@ public class S3FileService {
         repository.uploadDirectory(userFolder);
     }
 
-    private void checkPathExists(String path, String errorMessage){
-        if(!repository.checkResourceExists(path)){
+    private void checkPathExists(String path, String errorMessage) {
+        if (!repository.checkResourceExists(path)) {
             throw new PathNotFoundException(errorMessage);
         }
     }
 
-    private void checkResourceExists(NormalizedResourceData resourceData){
-        if (!repository.checkResourceExists(resourceData.getFullPath())){
+    private void checkResourceExists(NormalizedResourceData resourceData) {
+        if (!repository.checkResourceExists(resourceData.getFullPath())) {
             throw new ResourceNotFoundException(resourceData.getResourceType() == DIRECTORY ?
                     DIRECTORY_NOT_FOUND :
-                    FILE_NOT_FOUND);}
+                    FILE_NOT_FOUND);
+        }
     }
 }

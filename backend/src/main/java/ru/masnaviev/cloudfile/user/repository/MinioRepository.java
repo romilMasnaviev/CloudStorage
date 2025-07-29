@@ -8,12 +8,14 @@ import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.masnaviev.cloudfile.user.exception.resource.MinioOperationException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -109,4 +111,16 @@ public class MinioRepository {
         return true;
     }
 
+    public InputStreamResource downloadFile(String fullPath) {
+        try {
+            InputStream inputStream = client.getObject(GetObjectArgs.builder()
+                    .bucket(minioBucketName)
+                    .object(fullPath)
+                    .build());
+            return new InputStreamResource(inputStream);
+
+        } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+            throw new MinioOperationException(e.getMessage(), e.getCause());
+        }
+    }
 }

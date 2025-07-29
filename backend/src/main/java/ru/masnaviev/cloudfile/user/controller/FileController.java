@@ -3,7 +3,7 @@ package ru.masnaviev.cloudfile.user.controller;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,12 +11,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.masnaviev.cloudfile.user.dto.response.resource.DownloadResourceResponse;
 import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceInfoResponse;
 import ru.masnaviev.cloudfile.user.service.S3FileService;
 import ru.masnaviev.cloudfile.user.service.UserService;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static ru.masnaviev.cloudfile.user.constatnts.ApiPath.*;
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
 
@@ -55,12 +59,16 @@ class FileController {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
-        InputStreamResource resource = service.downloadResource(userId, path);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-    }
 
+        DownloadResourceResponse response = service.downloadResource(userId, path);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(CONTENT_DISPOSITION, "attachment;filename*=utf-8''"
+                + encodeFileName(response.getResourceName()));
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(response.getResource());
+    }
 
     @PostMapping(UPLOAD_DIRECTORY)
     // Путь указывается со слэшем в конце "/"
@@ -92,6 +100,10 @@ class FileController {
         Long userId = userService.getIdByUsername(userDetails.getUsername());
         List<ResourceInfoResponse> response = service.uploadResources(userId, path, files);
         return ResponseEntity.ok().body(response);
+    }
+
+    private String encodeFileName(String fileName) {
+        return URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
 }
