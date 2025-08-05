@@ -6,6 +6,7 @@ import io.minio.errors.MinioException;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,13 +16,15 @@ import ru.masnaviev.cloudfile.user.exception.resource.*;
 import ru.masnaviev.cloudfile.user.repository.MinioRepository;
 import ru.masnaviev.cloudfile.user.util.NormalizedResourceData;
 
-import java.io.IOException;
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.*;
 import static ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType.DIRECTORY;
@@ -57,15 +60,45 @@ public class S3FileService {
         NormalizedResourceData resourceData = new NormalizedResourceData(userId, path);
 
         checkPathExists(resourceData.getPathWithoutResourceName(), PATH_NOT_FOUND);
-
         checkResourceExists(resourceData);
 
 
         InputStreamResource resource = resourceData.getResourceType() == DIRECTORY ?
                 downloadDirectory(resourceData) :
-                repository.downloadFile(resourceData.getFullPath());
+                new InputStreamResource(repository.downloadResource(resourceData.getFullPath()));
 
-        return new DownloadResourceResponse(resourceData.getResourceName(), resource);
+        return new DownloadResourceResponse(resourceData.getResourceName(), resource, resourceData.getResourceType());
+    }
+
+    @SneakyThrows
+    private InputStreamResource downloadDirectory(NormalizedResourceData resourceData) {
+        Map<String, Item> resourcesForDownload = toItemMapByPath(repository
+                .getResourcesByPrefix(resourceData.getFullPath(), true));
+
+
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(byteOut);
+
+
+        for (String filename : resourcesForDownload.keySet()) {
+            InputStream stream = repository.downloadResource(filename);
+
+            NormalizedResourceData tmpData = new NormalizedResourceData(resourceData.getUserId(), filename);
+
+
+            // Сейчас файлы выглядят так (1 user files добавляется из за дублирования, второй по умолчанию)
+            // Нужно убирать сразу оба user files т.к у пользователя не должно быть доступа к названию его папки
+            // NormalizedResourceData{userId=3, userFolder='user-3-files', folders=[user-3-files, 1], type=FILE, resourceName='Задание.jpg',
+            // fullPath='user-3-files/user-3-files/1/Задание.jpg'}
+            // TODO рефакторинг
+            String sub = tmpData.getFullPath().substring(tmpData.getFullPath().indexOf('/') + 1);
+            zos.putNextEntry(new ZipEntry(sub.substring(tmpData.getFullPath().indexOf('/'))));
+            stream.transferTo(zos);
+            zos.closeEntry();
+        }
+        zos.close();
+
+        return new InputStreamResource(new ByteArrayInputStream(byteOut.toByteArray()));
     }
 
     public ResourceInfoResponse uploadDirectory(Long userId, String path) {
@@ -182,16 +215,6 @@ public class S3FileService {
 
         repository.deleteResources(objectsForDelete);
     }
-
-    private InputStreamResource downloadDirectory(NormalizedResourceData resourceData) {
-
-        // TODO на данный момент нельзя скачать папку так как я ее не сам создаю. После реализации метода
-        // TODO по созданию пустой папки можно доделать до конца. Также нужно реализовать downloadFile
-//        InputStream stream = repository.downloadDirectory(resourceData.getFullPath());
-//        return new InputStreamResource(stream);
-        return null;
-    }
-
 
     private ResourceInfoResponse toResponse(Long userId, String objectName, Long size,
                                             NormalizedResourceData resourceData) {

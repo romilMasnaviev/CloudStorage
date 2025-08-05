@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.masnaviev.cloudfile.user.dto.response.resource.DownloadResourceResponse;
 import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceInfoResponse;
+import ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType;
 import ru.masnaviev.cloudfile.user.service.S3FileService;
 import ru.masnaviev.cloudfile.user.service.UserService;
 
@@ -62,8 +63,9 @@ class FileController {
 
         DownloadResourceResponse response = service.downloadResource(userId, path);
         HttpHeaders headers = new HttpHeaders();
+        String postfix = response.getResourceType() == ResourceType.DIRECTORY ? ".zip" : "";
         headers.add(CONTENT_DISPOSITION, "attachment;filename*=utf-8''"
-                + encodeFileName(response.getResourceName()));
+                + encodeFileName(response.getResourceName()) + postfix);
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

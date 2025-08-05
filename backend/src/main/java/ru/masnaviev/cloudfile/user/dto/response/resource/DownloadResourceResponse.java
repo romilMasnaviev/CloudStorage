@@ -9,4 +9,5 @@ import org.springframework.core.io.InputStreamResource;
 public class DownloadResourceResponse {
     String resourceName;
     InputStreamResource resource;
+    ResourceType resourceType;
 }
