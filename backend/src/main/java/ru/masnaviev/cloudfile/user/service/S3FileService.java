@@ -1,12 +1,12 @@
 package ru.masnaviev.cloudfile.user.service;
 
+import io.minio.GetObjectResponse;
 import io.minio.Result;
 import io.minio.StatObjectResponse;
 import io.minio.errors.MinioException;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,19 +16,18 @@ import ru.masnaviev.cloudfile.user.exception.resource.*;
 import ru.masnaviev.cloudfile.user.repository.MinioRepository;
 import ru.masnaviev.cloudfile.user.util.NormalizedResourceData;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.masnaviev.cloudfile.user.constatnts.ErrorMessages.*;
 import static ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType.DIRECTORY;
 import static ru.masnaviev.cloudfile.user.dto.response.resource.ResourceType.FILE;
+import static ru.masnaviev.cloudfile.user.util.ZipBuilder.createZipFromResources;
 
 @Component
 @RequiredArgsConstructor
@@ -62,43 +61,28 @@ public class S3FileService {
         checkPathExists(resourceData.getPathWithoutResourceName(), PATH_NOT_FOUND);
         checkResourceExists(resourceData);
 
-
         InputStreamResource resource = resourceData.getResourceType() == DIRECTORY ?
                 downloadDirectory(resourceData) :
-                new InputStreamResource(repository.downloadResource(resourceData.getFullPath()));
+                downloadFile(resourceData);
 
         return new DownloadResourceResponse(resourceData.getResourceName(), resource, resourceData.getResourceType());
     }
 
-    @SneakyThrows
     private InputStreamResource downloadDirectory(NormalizedResourceData resourceData) {
-        Map<String, Item> resourcesForDownload = toItemMapByPath(repository
-                .getResourcesByPrefix(resourceData.getFullPath(), true));
+        Set<String> resourcesForDownload = toItemMapByPath(repository
+                .getResourcesByPrefix(resourceData.getFullPath(), true)).keySet();
 
+        Map<String, GetObjectResponse> downloadedResources = resourcesForDownload
+                .stream()
+                .collect(Collectors.toMap(s -> s, repository::downloadResource));
 
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        ZipOutputStream zos = new ZipOutputStream(byteOut);
-
-
-        for (String filename : resourcesForDownload.keySet()) {
-            InputStream stream = repository.downloadResource(filename);
-
-            NormalizedResourceData tmpData = new NormalizedResourceData(resourceData.getUserId(), filename);
-
-
-            // Сейчас файлы выглядят так (1 user files добавляется из за дублирования, второй по умолчанию)
-            // Нужно убирать сразу оба user files т.к у пользователя не должно быть доступа к названию его папки
-            // NormalizedResourceData{userId=3, userFolder='user-3-files', folders=[user-3-files, 1], type=FILE, resourceName='Задание.jpg',
-            // fullPath='user-3-files/user-3-files/1/Задание.jpg'}
-            // TODO рефакторинг
-            String sub = tmpData.getFullPath().substring(tmpData.getFullPath().indexOf('/') + 1);
-            zos.putNextEntry(new ZipEntry(sub.substring(tmpData.getFullPath().indexOf('/'))));
-            stream.transferTo(zos);
-            zos.closeEntry();
-        }
-        zos.close();
+        ByteArrayOutputStream byteOut = createZipFromResources(resourceData.getPathWithoutResourceName(), downloadedResources);
 
         return new InputStreamResource(new ByteArrayInputStream(byteOut.toByteArray()));
+    }
+
+    private InputStreamResource downloadFile(NormalizedResourceData resourceData) {
+        return new InputStreamResource(repository.downloadResource(resourceData.getFullPath()));
     }
 
     public ResourceInfoResponse uploadDirectory(Long userId, String path) {
@@ -172,9 +156,9 @@ public class S3FileService {
             Iterable<Result<Item>> existedResources = repository.getResourcesByPrefix(pathData.getFullPath(), true);
 
             // Получаем список существующих ресурсов
-            Map<String, Item> existedPaths = toItemMapByPath(existedResources);
+            Set<String> existedPaths = toItemMapByPath(existedResources).keySet();
 
-            pathsToCreate.removeAll(existedPaths.keySet());
+            pathsToCreate.removeAll(existedPaths);
 
             // Создаем папки при необходимости
             for (String pathToCreate : pathsToCreate) {
@@ -209,9 +193,9 @@ public class S3FileService {
 
         Iterable<Result<Item>> resourcesForDelete = repository.getResourcesByPrefix(resourceData.getFullPath(), true);
 
-        Map<String, Item> pathsForDelete = toItemMapByPath(resourcesForDelete);
+        Set<String> pathsForDelete = toItemMapByPath(resourcesForDelete).keySet();
 
-        List<DeleteObject> objectsForDelete = pathsForDelete.keySet().stream().map(DeleteObject::new).toList();
+        List<DeleteObject> objectsForDelete = pathsForDelete.stream().map(DeleteObject::new).toList();
 
         repository.deleteResources(objectsForDelete);
     }
