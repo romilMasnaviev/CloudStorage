@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cd6cb68f-71fd-4117-9272-af0e9c5ba7d8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/UserApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/UserApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/config/local/LocalResolverConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/config/local/LocalResolverConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/config/minio/ClientConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/config/minio/ClientConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/config/security/CustomAccessDeniedHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/config/security/CustomAccessDeniedHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/config/security/CustomAuthenticationEntryPoint.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/config/security/CustomAuthenticationEntryPoint.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/config/security/CustomSecurityConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/config/security/CustomSecurityConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/constatnts/ApiPath.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/constatnts/ApiPath.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/constatnts/ErrorMessages.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/constatnts/ErrorMessages.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/controller/FileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/request/user/UserAuthorizationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/request/user/UserAuthorizationRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/request/user/UserRegistrationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/request/user/UserRegistrationRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/response/resource/DownloadResourceResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/response/resource/DownloadResourceResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/response/resource/ResourceInfoResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/response/resource/ResourceInfoResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/response/resource/ResourceType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/response/resource/ResourceType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/response/user/UserAuthorizationResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/response/user/UserAuthorizationResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/response/user/UserMeResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/response/user/UserMeResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/dto/response/user/UserRegistrationResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/dto/response/user/UserRegistrationResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/ControllerAdvice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/ControllerAdvice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/ErrorResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/ErrorResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/DirectoryAlreadyExistsException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/DirectoryAlreadyExistsException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/DirectoryNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/DirectoryNotFoundException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/FileAlreadyExistsException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/FileAlreadyExistsException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/FileNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/FileNotFoundException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/FileReadException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/FileReadException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/MinioOperationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/MinioOperationException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/PathMustEndWithSlashException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/PathMustEndWithSlashException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/PathNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/PathNotFoundException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/resource/ResourceNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/resource/ResourceNotFoundException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/exception/user/UserAlreadyExistsException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/exception/user/UserAlreadyExistsException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/model/SecurityUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/model/SecurityUser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/model/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/repository/MinioRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/repository/MinioRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/service/CustomUserDetailsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/service/CustomUserDetailsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/service/S3FileService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/service/S3FileService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/service/impl/AuthServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/service/impl/AuthServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/service/impl/UserServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/service/impl/UserServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/util/NormalizedResourceData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/util/NormalizedResourceData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/ru/masnaviev/cloudfile/user/util/ZipBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/masnaviev/cloudfile/util/ZipBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application-local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-local.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V1_0_0__add_users.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/db/migration/V1_0_0__add_users.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/AbstractIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/AbstractIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/MockMvcHelperConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/MockMvcHelperConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/MockMvcTestHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/MockMvcTestHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/TestData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/TestData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/controller/AuthControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/controller/AuthControllerIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/controller/AuthControllerUnitTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/controller/AuthControllerUnitTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/controller/UserControllerIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/controller/UserControllerIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/service/impl/UserServiceImplUnitTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/service/impl/UserServiceImplUnitTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/ru/masnaviev/cloudfile/user/service/impl/UserServiceIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/ru/masnaviev/cloudfile/service/impl/UserServiceIntegrationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/application.properties" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="backend" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;romilMasnaviev&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:romilMasnaviev/CloudStorage.git&quot;,
+    &quot;accountId&quot;: &quot;d0dc6e06-e7c1-47f2-92ac-fd8e6e4d3251&quot;
+  }
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-compress/1.24.0/b4b1b5a3d9573b2970fddab236102c0a4d27d35e/commons-compress-1.24.0.jar!/META-INF/maven/org.apache.commons/commons-compress/pom.properties" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="37RXkTmJNBRIKyGGaPcNxKvVqPs" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Docker.infra/docker-compose-local.yml.postgres: Compose Deployment.executor": "Run",
+    "Docker.infra/docker-compose-local.yml.redis: Compose Deployment.executor": "Run",
+    "Docker.infra/docker-compose-local.yml: Compose Deployment.executor": "Run",
+    "Gradle.Build CloudStorage.executor": "Run",
+    "Gradle.Tests in 'backend.test'.executor": "Run",
+    "Gradle.Tests in 'cloudStorage.user.test'.executor": "Run",
+    "Gradle.UserControllerIntegrationTest.getUserMe_whenUserAuthorized_thenGetUserMeInfo.executor": "Run",
+    "Notification.DisplayName-DoNotAsk-Database detector": "Database detector",
+    "Notification.DoNotAsk-Database detector": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.UserApplication.executor": "Run",
+    "git-widget-placeholder": "storage",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/romil/dev/CloudStorage",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.31264368",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
+  }
+}]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.Tests in 'backend.test'">
+    <configuration name="Tests in 'backend.test'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="Tests in 'cloudStorage.user.test'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":user:test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="UserControllerIntegrationTest.getUserMe_whenUserAuthorized_thenGetUserMeInfo" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;ru.masnaviev.cloudfile.controller.UserControllerIntegrationTest.getUserMe_whenUserAuthorized_thenGetUserMeInfo&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration name="UserApplication (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
+      <module name="backend.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="ru.masnaviev.cloudfile.UserApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ru.masnaviev.cloudfile.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="UserApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
+      <module name="backend.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="ru.masnaviev.cloudfile.user.UserApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="infra/docker-compose-local.yml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="envFilePath" value="" />
+          <option name="sourceFilePath" value="infra/docker-compose-local.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="infra/docker-compose-local.yml.postgres: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="postgres" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="infra/docker-compose-local.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.Tests in 'backend.test'" />
+        <item itemvalue="Gradle.UserControllerIntegrationTest.getUserMe_whenUserAuthorized_thenGetUserMeInfo" />
+        <item itemvalue="Docker.infra/docker-compose-local.yml: Compose Deployment" />
+        <item itemvalue="Gradle.Tests in 'cloudStorage.user.test'" />
+        <item itemvalue="Docker.infra/docker-compose-local.yml.postgres: Compose Deployment" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.24978.46" />
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-IU-243.24978.46" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cd6cb68f-71fd-4117-9272-af0e9c5ba7d8" name="Changes" comment="" />
+      <created>1766867000623</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1766867000623</updated>
+      <workItem from="1766867001802" duration="156000" />
+      <workItem from="1766867163139" duration="415000" />
+      <workItem from="1767352899565" duration="149000" />
+      <workItem from="1767600464406" duration="1458000" />
+      <workItem from="1767688385634" duration="2355000" />
+      <workItem from="1767690752395" duration="2114000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
