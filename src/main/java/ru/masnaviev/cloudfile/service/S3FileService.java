@@ -25,8 +25,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.*;
-import static ru.masnaviev.cloudfile.dto.response.resource.ResourceType.DIRECTORY;
-import static ru.masnaviev.cloudfile.dto.response.resource.ResourceType.FILE;
+import static ru.masnaviev.cloudfile.util.NormalizedResourceData.ResourceType.DIRECTORY;
+import static ru.masnaviev.cloudfile.util.NormalizedResourceData.ResourceType.FILE;
 import static ru.masnaviev.cloudfile.util.ZipBuilder.createZipFromResources;
 
 @Component
