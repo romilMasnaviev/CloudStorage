@@ -13,6 +13,7 @@ public class ErrorMessages {
     public static final String PASSWORD_MUST_NOT_BE_EMPTY = "Password must not be empty";
     public static final String PASSWORD_LENGTH_BETWEEN_8_100 = "Username length must be between 8 and 50";
     public static final String PATH_MUST_NOT_BE_EMPTY = "Path must not be empty";
+    public static final String USERID_MUST_NOT_BE_LESS_0 = "User id must not be less 0";
 
     //Other
     public static final String USER_ALREADY_EXISTS = "User with this username already exists";

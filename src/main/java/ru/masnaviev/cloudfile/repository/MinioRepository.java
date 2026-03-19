@@ -26,9 +26,9 @@ public class MinioRepository {
     @Value("${minio.bucket.name}")
     private String minioBucketName;
 
-    public ObjectWriteResponse uploadDirectory(String path) {
+    public void uploadDirectory(String path) {
         try {
-            return client.putObject(PutObjectArgs.builder()
+            client.putObject(PutObjectArgs.builder()
                     .bucket(minioBucketName)
                     .object(path)
                     .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
@@ -84,14 +84,13 @@ public class MinioRepository {
         }
     }
 
-    public Iterable<Result<DeleteError>> deleteResources(Iterable<DeleteObject> deleteObjects) {
+    public void deleteResources(Iterable<DeleteObject> deleteObjects) {
         Iterable<Result<DeleteError>> results = client.removeObjects(RemoveObjectsArgs.builder()
                 .bucket(minioBucketName)
                 .objects(deleteObjects)
                 .build());
         results.forEach(r -> {
         });
-        return results;
     }
 
     public boolean checkResourceExists(String path) {

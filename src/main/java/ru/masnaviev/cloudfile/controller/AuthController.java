@@ -32,7 +32,7 @@ import static ru.masnaviev.cloudfile.constatnts.ApiPath.*;
 class AuthController {
     private final AuthService authService;
     private final UserService userService;
-    private final S3FileService s3FileService;
+    private final S3FileService s3FileServiceImpl;
 
 
     @Operation(
@@ -58,7 +58,7 @@ class AuthController {
     public ResponseEntity<UserRegistrationResponse> registration(@RequestBody @Valid UserRegistrationRequest request) {
 
         UserRegistrationResponse response = userService.registration(request);
-        s3FileService.createUserDirectory(userService.getIdByUsername(response.username()));
+        s3FileServiceImpl.createUserDirectory(userService.getIdByUsername(response.username()));
         return ResponseEntity.ok().body(response);
     }
 

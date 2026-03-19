@@ -100,4 +100,9 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponse> handleMinioOperationException(MinioOperationException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(500));
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalArgumentException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(400));
+    }
 }
