@@ -23,7 +23,7 @@ import java.util.List;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static ru.masnaviev.cloudfile.constatnts.ApiPath.*;
 import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
-import static ru.masnaviev.cloudfile.util.NormalizedResourceData.ResourceType.DIRECTORY;
+import static ru.masnaviev.cloudfile.util.ResourceType.DIRECTORY;
 
 @Validated
 @RestController

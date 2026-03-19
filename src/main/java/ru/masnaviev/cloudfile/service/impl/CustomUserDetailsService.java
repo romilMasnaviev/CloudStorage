@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudfile.service;
+package ru.masnaviev.cloudfile.service.impl;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

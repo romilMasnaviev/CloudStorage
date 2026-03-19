@@ -1,2 +1,6 @@
 build
 /.gradle/
+/.idea/modules/backend.main.iml
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/gradle.xml
