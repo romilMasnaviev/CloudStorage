@@ -105,4 +105,9 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalArgumentException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(400));
     }
+
+    @ExceptionHandler(ParentDirectoryDeletionException.class)
+    public ResponseEntity<ErrorResponse> handleParentDirectoryDeletionException(ParentDirectoryDeletionException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(405));
+    }
 }

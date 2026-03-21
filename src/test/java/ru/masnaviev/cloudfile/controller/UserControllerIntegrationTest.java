@@ -10,11 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
 import ru.masnaviev.cloudfile.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.MockMvcHelperConfig;
-import ru.masnaviev.cloudfile.MockMvcTestHelper;
 import ru.masnaviev.cloudfile.dto.response.user.UserAuthorizationResponse;
+import ru.masnaviev.cloudfile.helpers.MockMvcTestHelper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.masnaviev.cloudfile.TestData.PASSWORD;
@@ -29,11 +28,7 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
     private final Gson gson = new Gson();
 
     @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
     MockMvcTestHelper testHelper;
-
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -58,7 +53,7 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void getUserMe_whenUserUnauthorized_thenReturnUnauthorizedError() throws Exception {
         MockHttpServletResponse response = testHelper.performGetMe(null);
-        testHelper.checkErrorResponse(response, UNAUTHORIZED, 401);
+        testHelper.checkStatusAndMessage(response, UNAUTHORIZED, 401);
     }
 
     @Test
@@ -69,7 +64,7 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
 
         MockHttpServletResponse meResponse = testHelper.performGetMe(logoutResponse.getCookies());
 
-        testHelper.checkErrorResponse(meResponse, UNAUTHORIZED, 401);
+        testHelper.checkStatusAndMessage(meResponse, UNAUTHORIZED, 401);
     }
 
 }

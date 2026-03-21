@@ -25,6 +25,7 @@ public class ErrorMessages {
     public static final String FILE_ALREADY_EXIST = "File already exists";
     public static final String DIRECTORY_ALREADY_EXISTS = "Directory already exists";
     public static final String FILE_MUST_BE_INCLUDED_IN_REQUEST = "Files must be included in the request";
+    public static final String PROTECTED_PARENT_DIRECTORY = "Parent directory is protected and cannot be removed";
 
     public static final String RESOURCE_NOT_FOUND = "Resource not found";
     public static final String PATH_NOT_FOUND = "Path not found";

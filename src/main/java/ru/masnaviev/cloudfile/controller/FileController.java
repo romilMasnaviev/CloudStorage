@@ -1,6 +1,5 @@
 package ru.masnaviev.cloudfile.controller;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +21,6 @@ import java.util.List;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static ru.masnaviev.cloudfile.constatnts.ApiPath.*;
-import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
 import static ru.masnaviev.cloudfile.util.ResourceType.DIRECTORY;
 
 @Validated
@@ -33,9 +31,20 @@ class FileController {
     private final S3FileService service;
     private final UserService userService;
 
+    @PostMapping(path = UPLOAD_RESOURCE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadResources(
+            @RequestParam(name = "path", defaultValue = "/") String path,
+            @RequestPart(name = "file") List<MultipartFile> files,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long userId = userService.getIdByUsername(userDetails.getUsername());
+        List<ResourceInfoResponse> response = service.uploadResources(userId, path, files);
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping(GET_RESOURCE_INFO)
     public ResponseEntity<?> getResourceInfo(
-            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
+            @RequestParam(name = "path", defaultValue = "/") String path,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
@@ -44,9 +53,8 @@ class FileController {
     }
 
     @DeleteMapping(DELETE_RESOURCE)
-    //Если путь указан как "/", удалит все содержимое папки
     public ResponseEntity<?> deleteResource(
-            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
+            @RequestParam(name = "path", defaultValue = "/") String path,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
@@ -56,7 +64,7 @@ class FileController {
 
     @GetMapping(DOWNLOAD_RESOURCE)
     public ResponseEntity<?> downloadResource(
-            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
+            @RequestParam(name = "path", defaultValue = "/") String path,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
@@ -73,9 +81,8 @@ class FileController {
     }
 
     @PostMapping(UPLOAD_DIRECTORY)
-    // Путь указывается со слэшем в конце "/"
     public ResponseEntity<?> uploadDirectory(
-            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
+            @RequestParam(name = "path", defaultValue = "/") String path,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
@@ -85,7 +92,7 @@ class FileController {
 
     @GetMapping(GET_DIRECTORY_CONTENTS_INFO)
     public ResponseEntity<?> getDirectoryContentsInfo(
-            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
+            @RequestParam(name = "path", defaultValue = "/") String path,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         Long userId = userService.getIdByUsername(userDetails.getUsername());
@@ -93,19 +100,7 @@ class FileController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping(path = UPLOAD_RESOURCE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadResources(
-            @RequestParam(name = "path") @NotBlank(message = PATH_MUST_NOT_BE_EMPTY) String path,
-            @RequestPart(name = "file") List<MultipartFile> files,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        Long userId = userService.getIdByUsername(userDetails.getUsername());
-        List<ResourceInfoResponse> response = service.uploadResources(userId, path, files);
-        return ResponseEntity.ok().body(response);
-    }
-
     private String encodeFileName(String fileName) {
         return URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
     }
-
 }

@@ -12,9 +12,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.masnaviev.cloudfile.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.MockMvcHelperConfig;
-import ru.masnaviev.cloudfile.MockMvcTestHelper;
 import ru.masnaviev.cloudfile.dto.response.user.UserAuthorizationResponse;
 import ru.masnaviev.cloudfile.dto.response.user.UserRegistrationResponse;
+import ru.masnaviev.cloudfile.helpers.MockMvcTestHelper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.masnaviev.cloudfile.TestData.PASSWORD;
@@ -28,8 +28,6 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
     private final Gson gson = new Gson();
 
-    @Autowired
-    MockMvc mockMvc;
     @Autowired
     MockMvcTestHelper testHelper;
     @Autowired
@@ -56,7 +54,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
         var response = testHelper.performRegistration(USERNAME, PASSWORD, null);
 
-        testHelper.checkErrorResponse(response, USER_ALREADY_EXISTS, 409);
+        testHelper.checkStatusAndMessage(response, USER_ALREADY_EXISTS, 409);
     }
 
     @Test
@@ -66,7 +64,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
         var reRegisterResponse = testHelper.performRegistration(USERNAME, PASSWORD, authResponse.getCookies());
 
-        testHelper.checkErrorResponse(reRegisterResponse, ACCESS_DENIED, 403);
+        testHelper.checkStatusAndMessage(reRegisterResponse, ACCESS_DENIED, 403);
     }
 
     @Test
@@ -87,7 +85,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
         var secondAuthResponse = testHelper.performAuthorization(USERNAME, PASSWORD, firstAuthResponse.getCookies());
 
-        testHelper.checkErrorResponse(secondAuthResponse, ACCESS_DENIED, 403);
+        testHelper.checkStatusAndMessage(secondAuthResponse, ACCESS_DENIED, 403);
     }
 
     @Test
@@ -96,7 +94,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
         var response = testHelper.performAuthorization(USERNAME, PASSWORD + "1", null);
 
-        testHelper.checkErrorResponse(response, BAD_CREDENTIALS, 401);
+        testHelper.checkStatusAndMessage(response, BAD_CREDENTIALS, 401);
     }
 }
 

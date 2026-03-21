@@ -2,6 +2,7 @@ package ru.masnaviev.cloudfile.util;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -27,7 +28,7 @@ public class Resource {
     }
 
     public List<String> getPathsList() {
-        return List.copyOf(pathsList);
+        return new ArrayList<>(pathsList);
     }
 }
 

@@ -3,6 +3,7 @@ package ru.masnaviev.cloudfile.util;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,9 +24,13 @@ public class ResourceBuilder {
 
         String userFolder = initUserFolder(userId);
 
-        String fullPath = initFullPath(path, userFolder);
+        if (path.startsWith(userFolder)) {
+            path = path.substring(userFolder.length());
+        }
 
         ResourceType resourceType = path.endsWith("/") ? DIRECTORY : FILE;
+
+        String fullPath = initFullPath(path, userFolder, resourceType);
 
         String resourceName = initResourceName(path, fullPath);
 
@@ -60,8 +65,15 @@ public class ResourceBuilder {
         return path.equals("/") ? "" : List.of(fullPath.split("/")).getLast();
     }
 
-    private static String initFullPath(String path, String userFolder) {
-        return userFolder + "/" + (path.equals("/") ? "" : path);
+    private static String initFullPath(String path, String userFolder, ResourceType resourceType) {
+        Path result = Path.of(userFolder, path).normalize();
+
+        if (resourceType == DIRECTORY) {
+            String stringPath = result.toString();
+            return stringPath.endsWith("/") ? stringPath : stringPath + "/";
+        }
+
+        return result.toString();
     }
 
     private static String initUserFolder(Long userId) {

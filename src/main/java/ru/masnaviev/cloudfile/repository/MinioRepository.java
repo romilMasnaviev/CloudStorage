@@ -16,6 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -61,16 +63,17 @@ public class MinioRepository {
         }
     }
 
-    public Iterable<Result<Item>> getResourcesByPrefix(String path, boolean recursively) {
+    public Map<String, Item> getResourcesItemsByPrefix(String prefix, boolean recursively) {
         Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
                 .bucket(minioBucketName)
-                .prefix(path)
+                .prefix(prefix)
                 .recursive(recursively)
                 .build());
+
         results.forEach(r -> {
         });
 
-        return results;
+        return toItemMapByPath(results);
     }
 
     public void deleteResource(String path) {
@@ -117,5 +120,18 @@ public class MinioRepository {
         } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
             throw new MinioOperationException(e.getMessage(), e.getCause());
         }
+    }
+
+    private Map<String, Item> toItemMapByPath(Iterable<Result<Item>> results) {
+        Map<String, Item> paths = new HashMap<>();
+
+        try {
+            for (Result<Item> result : results) {
+                paths.put(result.get().objectName(), result.get());
+            }
+        } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+            throw new MinioOperationException(e.getMessage(), e.getCause());
+        }
+        return paths;
     }
 }

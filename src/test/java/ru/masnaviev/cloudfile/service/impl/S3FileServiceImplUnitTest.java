@@ -1,5 +1,6 @@
 package ru.masnaviev.cloudfile.service.impl;
 
+import io.minio.GetObjectResponse;
 import io.minio.StatObjectResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,7 @@ public class S3FileServiceImplUnitTest {
     MinioRepository minioRepository;
 
     @InjectMocks
-    ru.masnaviev.cloudfile.service.impl.S3FileServiceImpl service;
+    S3FileServiceImpl service;
 
     @Test
     public void getResourceInfo_whenResourceExist_thenReturnValidResponse() {
@@ -132,4 +133,21 @@ public class S3FileServiceImplUnitTest {
         verify(minioRepository, times(1)).checkResourceExists(resource.getFullPath());
         verify(minioRepository, times(0)).deleteResource(resource.getFullPath());
     }
+
+    @Test
+    public void downloadResource_whenFileExists_thenReturnValidResponse() {
+        Resource resource = createFrom(1L, "test.txt");
+
+        when(minioRepository.checkResourceExists(resource.getPathWithoutResourceName())).thenReturn(true);
+        when(minioRepository.checkResourceExists(resource.getFullPath())).thenReturn(true);
+        when(minioRepository.downloadResource(resource.getFullPath())).thenReturn(mock(GetObjectResponse.class));
+
+        service.downloadResource(1L, "test.txt");
+
+        verify(minioRepository, times(1)).checkResourceExists(resource.getPathWithoutResourceName());
+        verify(minioRepository, times(1)).checkResourceExists(resource.getFullPath());
+        verify(minioRepository, times(1)).downloadResource(resource.getFullPath());
+    }
+
+    //TODO дописать тесты на остальные методы
 }
