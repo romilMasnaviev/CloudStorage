@@ -22,8 +22,11 @@ public class TestData {
     }
 
     public static final MockMultipartFile file1 = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
+    public static final String file1Path = "user-1-files/hello.txt";
     public static final MockMultipartFile file2 = new MockMultipartFile("file", "folder1/hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
+    public static final String file2Path = "user-1-files/folder1/hello.txt";
     public static final MockMultipartFile file3 = new MockMultipartFile("file", "folder1/folder2/hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
+    public static final String file3Path = "user-1-files/folder1/folder2/hello.txt";
 
     public static final MockMultipartFile file4 = new MockMultipartFile("file", "folder1/hello4.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
     public static final MockMultipartFile file5 = new MockMultipartFile("file", "folder1/hello5.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());

@@ -1,9 +1,15 @@
 package ru.masnaviev.cloudfile.controller;
 
 import com.google.gson.Gson;
-import io.minio.*;
+import io.minio.ListObjectsArgs;
+import io.minio.MinioClient;
+import io.minio.RemoveObjectsArgs;
+import io.minio.Result;
 import io.minio.errors.MinioException;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -18,6 +25,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import ru.masnaviev.cloudfile.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.dto.response.resource.ResourceInfoResponse;
 import ru.masnaviev.cloudfile.helpers.MockMvcTestHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.masnaviev.cloudfile.TestData.*;
@@ -38,44 +48,39 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     private MinioClient minioClient;
 
     private final Gson gson = new Gson();
+    private Cookie[] cookies;
 
     @BeforeEach
     void clearDb() throws Exception {
         jdbcTemplate.execute("TRUNCATE TABLE users RESTART IDENTITY");
-
         clearMinioBucket();
+        cookies = performAuthorization().getCookies();
     }
 
     @Test
+    @DisplayName("Загрузка одного файла")
     void uploadResources_whenOneFile_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
-
         MockMultipartFile file = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
 
-        var response = testHelper.performUploadFile(file, "/", mockHttpServletResponse.getCookies());
+        var response = testHelper.performUploadFile(file, "/", cookies);
 
-        var minioResponse = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/hello.txt");
+        var minioResponse = testHelper.performGetStatObjectFromMinio(minioClient, file1Path);
 
-        assertEquals(200, response.getStatus());
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
+
         assertEquals(file.getSize(), minioResponse.size());
     }
 
     @Test
-    @DisplayName("Загрузка нескольких файлов в одном запросе, в именах файлах есть пути")
-    void uploadResources_whenNeOneFile_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Загрузка нескольких файлов в одном запросе, в именах файлов есть пути")
+    void uploadResources_whenMultipleFiles_thenReturnValidResponse() throws Exception {
+        var response = testHelper.performUpload3Files(file1, file2, file3, "", cookies);
 
-        var response = testHelper.performUpload3Files(file1, file2, file3, "", mockHttpServletResponse.getCookies());
+        var minioResponse1 = testHelper.performGetStatObjectFromMinio(minioClient, file1Path);
+        var minioResponse2 = testHelper.performGetStatObjectFromMinio(minioClient, file2Path);
+        var minioResponse3 = testHelper.performGetStatObjectFromMinio(minioClient, file3Path);
 
-        var minioResponse1 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/hello.txt");
-        var minioResponse2 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/hello.txt");
-        var minioResponse3 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/folder2/hello.txt");
-
-        assertEquals(200, response.getStatus());
-
-//        gson.fromJson(response.getContentAsString(),new TypeToken<List<ResourceInfoResponse>>(){}.getType());
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
 
         assertEquals(file1.getSize(), minioResponse1.size());
         assertEquals(file2.getSize(), minioResponse2.size());
@@ -83,158 +88,130 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("Загрузка одного файла, файл уже существует")
     void uploadResources_whenFileAlreadyExists_thenReturnException() throws Exception {
+        testHelper.performUploadFile(file1, "", cookies);
 
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        var response = testHelper.performUploadFile(file1, "", cookies);
 
-        testHelper.performUploadFile(file1, "", mockHttpServletResponse.getCookies());
-
-        var response = testHelper.performUploadFile(file1, "", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, FILE_ALREADY_EXIST, 409);
+        testHelper.checkStatusAndMessage(response, FILE_ALREADY_EXIST, HttpStatus.CONFLICT.value());
     }
 
-
     @Test
+    @DisplayName("Получение информации о файле, файл существует")
     void getResourceInfo_whenFileExists_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performUploadFile(file1, "", cookies);
 
-        testHelper.performUploadFile(file1, "", mockHttpServletResponse.getCookies());
+        var response = testHelper.performGetResourceInfo("hello.txt", cookies);
 
-        var response = testHelper.performGetResourceInfo("hello.txt", mockHttpServletResponse.getCookies());
-
-
-        assertEquals(200, response.getStatus());
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
         var gsonResponse = gson.fromJson(response.getContentAsString(), ResourceInfoResponse.class);
         assertEquals(file1.getSize(), gsonResponse.getSize());
         assertEquals(FILE, gsonResponse.getResourceType());
     }
 
     @Test
+    @DisplayName("Получение информации о директории, директория существует")
     void getResourceInfo_whenDirectoryExists_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performUploadFile(file2, "", cookies);
 
-        testHelper.performUploadFile(file2, "", mockHttpServletResponse.getCookies());
+        var response = testHelper.performGetResourceInfo("folder1/", cookies);
 
-        var response = testHelper.performGetResourceInfo("folder1/", mockHttpServletResponse.getCookies());
-
-
-        assertEquals(200, response.getStatus());
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
         var gsonResponse = gson.fromJson(response.getContentAsString(), ResourceInfoResponse.class);
         assertEquals(DIRECTORY, gsonResponse.getResourceType());
     }
 
     @Test
-    void getResourceInfo_whenFileDoesntExist_thenException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Получение информации о файле, файл не существует")
+    void getResourceInfo_whenFileDoesntExist_thenReturnException() throws Exception {
+        var response = testHelper.performGetResourceInfo("test.txt", cookies);
 
-        var response = testHelper.performGetResourceInfo("test.txt", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, FILE_NOT_FOUND, 404);
+        testHelper.checkStatusAndMessage(response, FILE_NOT_FOUND, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
-    void getResourceInfo_whenDirectoryDoesntExist_thenException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Получение информации о директории, директория не существует")
+    void getResourceInfo_whenDirectoryDoesntExist_thenReturnException() throws Exception {
+        var response = testHelper.performGetResourceInfo("folder1/", cookies);
 
-        var response = testHelper.performGetResourceInfo("folder1/", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, DIRECTORY_NOT_FOUND, 404);
+        testHelper.checkStatusAndMessage(response, DIRECTORY_NOT_FOUND, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
-    void getResourceInfo_whenPathDoesntExist_thenException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Получение информации о ресурсе, путь не существует")
+    void getResourceInfo_whenPathDoesntExist_thenReturnException() throws Exception {
+        var response = testHelper.performGetResourceInfo("folder/pathDoesntExist/", cookies);
 
-        var response = testHelper.performGetResourceInfo("folder/pathDoesntExist/", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, PATH_NOT_FOUND, 400);
+        testHelper.checkStatusAndMessage(response, PATH_NOT_FOUND, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
-    void deleteResource_whenTryToDeleteParentDirectory_thenException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Удаление ресурса, ресурс - родительская папка")
+    void deleteResource_whenTryToDeleteParentDirectory_thenReturnException() throws Exception {
+        var response = testHelper.performDeleteResource("/", cookies);
 
-        var response = testHelper.performDeleteResource("/", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, PROTECTED_PARENT_DIRECTORY, 405);
+        testHelper.checkStatusAndMessage(response, PROTECTED_PARENT_DIRECTORY, HttpStatus.METHOD_NOT_ALLOWED.value());
     }
 
     @Test
-    void deleteResource_whenFileDoesntExist_thenException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Удаление файла, файл не существует")
+    void deleteResource_whenFileDoesntExist_thenReturnException() throws Exception {
+        var response = testHelper.performDeleteResource("test.txt", cookies);
 
-        var response = testHelper.performDeleteResource("test.txt", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, FILE_NOT_FOUND, 404);
+        testHelper.checkStatusAndMessage(response, FILE_NOT_FOUND, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
-    void deleteResource_whenDirectoryDoesntExist_thenException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Удаление директории, директория не существует")
+    void deleteResource_whenDirectoryDoesntExist_thenReturnException() throws Exception {
+        var response = testHelper.performDeleteResource("folder1/", cookies);
 
-        var response = testHelper.performDeleteResource("folder1/", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, DIRECTORY_NOT_FOUND, 404);
+        testHelper.checkStatusAndMessage(response, DIRECTORY_NOT_FOUND, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
-    void deleteResource_whenPathDoesntExist_thenException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Удаление директории, пути не существует")
+    void deleteResource_whenPathDoesntExist_thenReturnException() throws Exception {
+        var response = testHelper.performDeleteResource("folder1/someFile", cookies);
 
-        var response = testHelper.performDeleteResource("folder1/someFile", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, PATH_NOT_FOUND, 400);
+        testHelper.checkStatusAndMessage(response, PATH_NOT_FOUND, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
+    @DisplayName("Удаление файла, файл существует")
     void deleteResource_whenFileExists_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
-
-        testHelper.performUploadFile(file1, "", mockHttpServletResponse.getCookies());
-        var minioResponseBeforeDelete = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/hello.txt");
+        testHelper.performUploadFile(file1, "", cookies);
+        var minioResponseBeforeDelete = testHelper.performGetStatObjectFromMinio(minioClient, file1Path);
         assertEquals(file1.getSize(), minioResponseBeforeDelete.size());
 
-        var responseAfterDelete = testHelper.performDeleteResource("hello.txt", mockHttpServletResponse.getCookies());
+        var responseAfterDelete = testHelper.performDeleteResource("hello.txt", cookies);
 
-        assertEquals(204, responseAfterDelete.getStatus());
+        assertEquals(HttpStatus.NO_CONTENT.value(), responseAfterDelete.getStatus());
 
-        var minioException = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/hello.txt"));
+        var minioException = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, file1Path));
         assertEquals("Object does not exist", minioException.getMessage());
     }
 
     @Test
+    @DisplayName("Удаление директории и вложенных в нее файлов")
     void deleteResource_whenDirectoryExists_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performUpload3Files(file1, file2, file3, "", cookies);
 
-        testHelper.performUpload3Files(file1, file2, file3, "", mockHttpServletResponse.getCookies());
-
-        var responseBeforeDelete1 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/hello.txt");
-        var responseBeforeDelete2 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/hello.txt");
-        var responseBeforeDelete3 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/folder2/hello.txt");
+        var responseBeforeDelete1 = testHelper.performGetStatObjectFromMinio(minioClient, file1Path);
+        var responseBeforeDelete2 = testHelper.performGetStatObjectFromMinio(minioClient, file2Path);
+        var responseBeforeDelete3 = testHelper.performGetStatObjectFromMinio(minioClient, file3Path);
 
         assertEquals(file1.getSize(), responseBeforeDelete1.size());
         assertEquals(file2.getSize(), responseBeforeDelete2.size());
         assertEquals(file3.getSize(), responseBeforeDelete3.size());
 
-        var responseAfterDelete = testHelper.performDeleteResource("folder1/", mockHttpServletResponse.getCookies());
-        assertEquals(204, responseAfterDelete.getStatus());
+        var responseAfterDelete = testHelper.performDeleteResource("folder1/", cookies);
+        assertEquals(HttpStatus.NO_CONTENT.value(), responseAfterDelete.getStatus());
 
-        var responseAfterDelete1 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/hello.txt");
-        var minioExceptionAfterDelete2 = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/hello.txt"));
-        var minioExceptionAfterDelete3 = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/folder2/hello.txt"));
+        var responseAfterDelete1 = testHelper.performGetStatObjectFromMinio(minioClient, file1Path);
+        var minioExceptionAfterDelete2 = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, file2Path));
+        var minioExceptionAfterDelete3 = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, file3Path));
 
         assertEquals(file1.getSize(), responseAfterDelete1.size());
         assertEquals("Object does not exist", minioExceptionAfterDelete2.getMessage());
@@ -242,37 +219,31 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("Скачивание файла")
     void downloadResource_whenFileExists_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performUploadFile(file1, "", cookies);
 
-        testHelper.performUploadFile(file1, "", mockHttpServletResponse.getCookies());
-
-        var response = testHelper.performDownloadResource("hello.txt", mockHttpServletResponse.getCookies());
+        var response = testHelper.performDownloadResource("hello.txt", cookies);
 
         assertArrayEquals(file1.getBytes(), response.getContentAsByteArray());
     }
 
     @Test
-    void downloadResource_whenFileExists_thenReturnValidResponse1() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Скачивание файла в директории")
+    void downloadResource_whenFileExistsInDirectory_thenReturnValidResponse() throws Exception {
+        testHelper.performUploadFile(file2, "", cookies);
 
-        testHelper.performUploadFile(file2, "", mockHttpServletResponse.getCookies());
-
-        var response = testHelper.performDownloadResource("folder1/hello.txt", mockHttpServletResponse.getCookies());
+        var response = testHelper.performDownloadResource("folder1/hello.txt", cookies);
 
         assertArrayEquals(file1.getBytes(), response.getContentAsByteArray());
     }
 
     @Test
-    void downloadResource_whenDirectoryExists_thenReturnValidResponse1() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    @DisplayName("Скачивание директории")
+    void downloadResource_whenDirectoryExists_thenReturnValidResponse() throws Exception {
+        testHelper.performUpload3Files(file4, file5, file6, "", cookies);
 
-        testHelper.performUpload3Files(file4, file5, file6, "", mockHttpServletResponse.getCookies());
-
-        var response = testHelper.performDownloadResource("folder1/", mockHttpServletResponse.getCookies());
+        var response = testHelper.performDownloadResource("folder1/", cookies);
 
         assertTrue(testHelper.checkFileInZipResponse(response, file4));
         assertTrue(testHelper.checkFileInZipResponse(response, file5));
@@ -280,82 +251,69 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("Скачивание файла, файл не существует")
     void downloadResource_whenFileDoesntExist_thenReturnException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        var response = testHelper.performDownloadResource("hello.txt", cookies);
 
-        var response = testHelper.performDownloadResource("hello.txt", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, FILE_NOT_FOUND, 404);
+        testHelper.checkStatusAndMessage(response, FILE_NOT_FOUND, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
+    @DisplayName("Скачивание файла, путь не существует")
     void downloadResource_whenPathDoesntExist_thenReturnException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        var response = testHelper.performDownloadResource("folder/pathDoesntExist/", cookies);
 
-        var response = testHelper.performDownloadResource("folder/pathDoesntExist/", mockHttpServletResponse.getCookies());
-
-        testHelper.checkStatusAndMessage(response, PATH_NOT_FOUND, 400);
+        testHelper.checkStatusAndMessage(response, PATH_NOT_FOUND, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
+    @DisplayName("Создание директории")
     void uploadDirectory_whenPathExists_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
-
-        var response = testHelper.performUploadDirectory("folder/", mockHttpServletResponse.getCookies());
-        assertEquals(201, response.getStatus());
+        var response = testHelper.performUploadDirectory("folder/", cookies);
+        assertEquals(HttpStatus.CREATED.value(), response.getStatus());
         var minioResponse = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder/");
 
         assertEquals(0, minioResponse.size());
     }
 
     @Test
+    @DisplayName("Создание директории, директория существует")
     void uploadDirectory_whenDirectoryAlreadyExists_thenReturnException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        var response = testHelper.performUploadDirectory("folder/", cookies);
+        assertEquals(HttpStatus.CREATED.value(), response.getStatus());
 
-        var response = testHelper.performUploadDirectory("folder/", mockHttpServletResponse.getCookies());
-        assertEquals(201, response.getStatus());
-
-        var response2 = testHelper.performUploadDirectory("folder/", mockHttpServletResponse.getCookies());
-        testHelper.checkStatusAndMessage(response2, DIRECTORY_ALREADY_EXISTS, 409);
+        var response2 = testHelper.performUploadDirectory("folder/", cookies);
+        testHelper.checkStatusAndMessage(response2, DIRECTORY_ALREADY_EXISTS, HttpStatus.CONFLICT.value());
     }
 
     @Test
+    @DisplayName("Создание директории, родительская директория не существует")
     void uploadDirectory_whenParentPathDoesntExist_thenReturnException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
-
-        var response = testHelper.performUploadDirectory("folder/folder2/", mockHttpServletResponse.getCookies());
-        testHelper.checkStatusAndMessage(response, DIRECTORY_NOT_FOUND, 404);
+        var response = testHelper.performUploadDirectory("folder/folder2/", cookies);
+        testHelper.checkStatusAndMessage(response, DIRECTORY_NOT_FOUND, HttpStatus.NOT_FOUND.value());
     }
 
     @Test
+    @DisplayName("Создание директории, путь не существует")
     void uploadDirectory_whenInvalidPath_thenReturnException() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
-
-        var response = testHelper.performUploadDirectory("folder", mockHttpServletResponse.getCookies());
-        testHelper.checkStatusAndMessage(response, PATH_MUST_BE_END_SLASH, 400);
+        var response = testHelper.performUploadDirectory("folder", cookies);
+        testHelper.checkStatusAndMessage(response, PATH_MUST_BE_END_SLASH, HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
+    @DisplayName("Получение содержимого директории")
     void getDirectoryContentInfo_whenFilesExists_thenReturnValidResponse() throws Exception {
-        testHelper.performRegistration(USERNAME, PASSWORD, null);
-        var mockHttpServletResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
+        testHelper.performUpload3Files(file4, file5, file6, "", cookies);
 
-        MockHttpServletResponse response1 = testHelper.performUpload3Files(file4, file5, file6, "", mockHttpServletResponse.getCookies());
-        System.out.println("response1.getStatus() = " + response1.getStatus());
-
-
-        var response = testHelper.performGetDirectoryContentsInfo("folder1/", mockHttpServletResponse.getCookies());
-        assertEquals(200, response.getStatus());
-
+        var response = testHelper.performGetDirectoryContentsInfo("folder1/", cookies);
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
 
     }
 
+    private MockHttpServletResponse performAuthorization() throws Exception {
+        testHelper.performRegistration(USERNAME, PASSWORD, null);
+        return testHelper.performAuthorization(USERNAME, PASSWORD, null);
+    }
 
     private void clearMinioBucket() throws Exception {
         Iterable<Result<Item>> iterable = minioClient.listObjects(ListObjectsArgs.builder()
@@ -363,23 +321,23 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
                 .recursive(true)
                 .build());
 
-        for (Result<Item> result : iterable) {
-            Item item = result.get();
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder()
-                            .bucket("user-files")
-                            .object(item.objectName())
-                            .build()
-            );
+        List<DeleteObject> resultList = new ArrayList<>();
+        for (Result<Item> itemResult : iterable) {
+            resultList.add((new DeleteObject(itemResult.get().objectName())));
         }
 
-        minioClient.removeBucket(
-                RemoveBucketArgs.builder().bucket("user-files").build()
-        );
-
-        minioClient.makeBucket(MakeBucketArgs.builder()
+        RemoveObjectsArgs removeObjectArgs = RemoveObjectsArgs
+                .builder()
                 .bucket("user-files")
-                .build());
+                .objects(resultList)
+                .build();
+
+        Iterable<Result<DeleteError>> results = minioClient.removeObjects(removeObjectArgs);
+
+        for (Result<DeleteError> result : results) {
+            DeleteError error = result.get();
+            throw new RuntimeException("Ошибка удаления файла " + error.objectName());
+        }
     }
 
 }
