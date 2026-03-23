@@ -180,6 +180,15 @@ public class MockMvcTestHelper {
                 .getResponse();
     }
 
+    public MockHttpServletResponse performSearchResource(String query, Cookie[] cookies) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                        .get(FIND_RESOURCE)
+                        .param("query", query)
+                        .cookie(cookies))
+                .andReturn()
+                .getResponse();
+    }
+
     public StatObjectResponse performGetStatObjectFromMinio(MinioClient minioClient, String path) throws Exception {
         return minioClient.statObject(StatObjectArgs.builder()
                 .bucket("user-files")

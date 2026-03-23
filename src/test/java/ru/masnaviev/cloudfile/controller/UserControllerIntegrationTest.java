@@ -3,6 +3,7 @@ package ru.masnaviev.cloudfile.controller;
 
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -39,7 +40,8 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getUserMe_whenUserAuthorized_thenGetUserMeInfo() throws Exception {
+    @DisplayName("Получение информации о себе: авторизованный пользователь успешно получает данные")
+    void getUserMe_whenUserAuthorized_thenReturnsUserInfo() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse authResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
@@ -51,13 +53,15 @@ class UserControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @DisplayName("Получение информации о себе: неавторизованный пользователь получает 401 Unauthorized")
     void getUserMe_whenUserUnauthorized_thenReturnUnauthorizedError() throws Exception {
         MockHttpServletResponse response = testHelper.performGetMe(null);
         testHelper.checkStatusAndMessage(response, UNAUTHORIZED, 401);
     }
 
     @Test
-    void getUserMe_whenUserLogsOut_thenAccessDeniedAfterLogout() throws Exception {
+    @DisplayName("Получение информации о себе: после логаута доступ запрещен, возвращается 401 Unauthorized")
+    void getUserMe_whenUserLoggedOut_thenReturnUnauthorizedError() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse authResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
         MockHttpServletResponse logoutResponse = testHelper.performSignOut(authResponse.getCookies());

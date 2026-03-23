@@ -2,6 +2,7 @@ package ru.masnaviev.cloudfile.controller;
 
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,7 +39,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void registerUser_whenValidData_thenUserRegistrationSucceeds() throws Exception {
+    @DisplayName("Регистрация: при передаче валидных данных пользователь успешно регистрируется")
+    void registerUser_whenValidData_thenRegistrationSucceeds() throws Exception {
         MockHttpServletResponse response = testHelper.performRegistration(USERNAME, PASSWORD, null);
 
         var registrationResponse = gson.fromJson(response.getContentAsString(), UserRegistrationResponse.class);
@@ -48,7 +50,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void registerUser_whenUserAlreadyExists_thenReturnErrorMessage() throws Exception {
+    @DisplayName("Регистрация: попытка зарегистрировать существующего пользователя возвращает 409 Conflict")
+    void registerUser_whenUserAlreadyExists_thenReturnConflictError() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
 
         var response = testHelper.performRegistration(USERNAME, PASSWORD, null);
@@ -57,7 +60,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void registerUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReRegister() throws Exception {
+    @DisplayName("Регистрация: авторизованный пользователь не может зарегистрироваться, возвращается 403 Forbidden")
+    void registerUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedError() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse authResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
@@ -67,7 +71,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void authorizeUser_whenUserExists_thenUserAuthorizationSucceeds() throws Exception {
+    @DisplayName("Авторизация: при верных учетных данных пользователь успешно авторизуется")
+    void authorizeUser_whenValidCredentials_thenAuthorizationSucceeds() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse response = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
@@ -78,7 +83,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void authorizeUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedOnReAuth() throws Exception {
+    @DisplayName("Авторизация: попытка повторной авторизации залогиненного пользователя возвращает 403 Forbidden")
+    void authorizeUser_whenUserAlreadyAuthorized_thenReturnAccessDeniedError() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
         MockHttpServletResponse firstAuthResponse = testHelper.performAuthorization(USERNAME, PASSWORD, null);
 
@@ -88,7 +94,8 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void authorizeUser_whenInvalidCredentials_thenReturnBadCredentialsError() throws Exception {
+    @DisplayName("Авторизация: при неверном пароле возвращается 401 Unauthorized")
+    void authorizeUser_whenInvalidCredentials_thenReturnUnauthorizedError() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);
 
         var response = testHelper.performAuthorization(USERNAME, PASSWORD + "1", null);
@@ -96,24 +103,3 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
         testHelper.checkStatusAndMessage(response, BAD_CREDENTIALS, 401);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

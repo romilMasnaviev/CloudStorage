@@ -67,27 +67,27 @@ public class S3FileServiceImpl implements S3FileService {
 
     @Override
     public List<ResourceInfoResponse> uploadResources(Long userId, String path, List<MultipartFile> files) {
-        Resource pathData = createFrom(userId, path);
-        checkPathExists(pathData.getPathWithoutResourceName());
+        Resource resourceData = createFrom(userId, path);
+        checkPathExists(resourceData.getPathWithoutResourceName());
 
-        checkPathEndWithSlash(pathData);
+        checkPathEndWithSlash(resourceData);
 
         List<ResourceInfoResponse> responses = new ArrayList<>();
 
         for (var file : files) {
-            Resource resourceData = createFrom(userId, path + file.getOriginalFilename());
+            Resource filesData = createFrom(userId, path + file.getOriginalFilename());
 
-            if (repository.checkResourceExists(resourceData.getFullPath())) {
+            if (repository.checkResourceExists(filesData.getFullPath())) {
                 throw new FileAlreadyExistsException(FILE_ALREADY_EXIST);
             }
 
-            List<String> pathsToCreate = resourceData.getPathsList();
+            List<String> pathsToCreate = filesData.getPathsList();
 
-            Set<String> existedPaths = repository.getResourcesItemsByPrefix(pathData.getFullPath(), true).keySet();
+            Set<String> existedPaths = repository.getResourcesItemsByPrefix(resourceData.getFullPath(), true).keySet();
 
             pathsToCreate.removeAll(existedPaths);
 
-            String userFolder = pathData.getUserFolder();
+            String userFolder = resourceData.getUserFolder();
 
             for (String pathToCreate : pathsToCreate) {
                 repository.uploadDirectory(pathToCreate);
@@ -109,8 +109,8 @@ public class S3FileServiceImpl implements S3FileService {
                 responses.add(response);
             }
 
-            repository.uploadFile(resourceData.getFullPath(), file);
-            ResourceInfoResponse response = ResourceInfoResponseBuilder.createFrom(resourceData.getPathWithoutUsernameAndResourceName(), resourceData.getResourceName(), file.getSize(), resourceData.getResourceType());
+            repository.uploadFile(filesData.getFullPath(), file);
+            ResourceInfoResponse response = ResourceInfoResponseBuilder.createFrom(filesData.getPathWithoutUsernameAndResourceName(), filesData.getResourceName(), file.getSize(), filesData.getResourceType());
 
             responses.add(response);
         }
@@ -182,11 +182,11 @@ public class S3FileServiceImpl implements S3FileService {
     public List<ResourceInfoResponse> searchResource(Long userId, String query) {
         Resource pathData = createFrom(userId, query);
         Map<String, Item> resources = repository.getResourcesItemsByPrefix(pathData.getUserFolder(), true);
-        resources.remove(pathData.getUserFolder() + "/");
+        resources.remove(pathData.getFullPath());
 
         List<ResourceInfoResponse> responses = new ArrayList<>();
         for (Map.Entry<String, Item> resource : resources.entrySet()) {
-            var resultData = createFrom(userId, resource.getKey());
+            var resultData = createFrom(userId, resource.getKey().replace(pathData.getUserFolder()+ "/","/"));
             if (resultData.getResourceType() != DIRECTORY && resultData.getResourceName().toLowerCase().contains(query.toLowerCase())) {
                 ResourceInfoResponse response = ResourceInfoResponseBuilder.createFrom(resultData.getPathWithoutUsernameAndResourceName(), resultData.getResourceName(),
                         resource.getValue().size(), resultData.getResourceType());
@@ -221,8 +221,7 @@ public class S3FileServiceImpl implements S3FileService {
 
         Map<String, Item> resultMap = repository.getResourcesItemsByPrefix(resourceData.getFullPath(), false);
         //убираем родительскую папку
-        resultMap.remove(resourceData.getUserFolder() + "/");
-
+        resultMap.remove(resourceData.getFullPath());
         List<ResourceInfoResponse> responses = new ArrayList<>();
 
         for (Map.Entry<String, Item> result : resultMap.entrySet()) {
