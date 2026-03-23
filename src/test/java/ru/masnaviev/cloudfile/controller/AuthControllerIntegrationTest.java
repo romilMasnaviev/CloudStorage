@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
 import ru.masnaviev.cloudfile.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.MockMvcHelperConfig;
 import ru.masnaviev.cloudfile.dto.response.user.UserAuthorizationResponse;

@@ -18,10 +18,7 @@ import ru.masnaviev.cloudfile.util.ResourceType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.*;
@@ -118,7 +115,7 @@ public class S3FileServiceImpl implements S3FileService {
 
     public List<ResourceInfoResponse> uploadResources(Long userId, String path, List<MultipartFile> files) {
         Resource pathData = createFrom(userId, path);
-        checkPathExists(pathData.getFullPath());
+        checkPathExists(pathData.getPathWithoutResourceName());
 
         checkPathEndWithSlash(pathData);
 
@@ -137,10 +134,24 @@ public class S3FileServiceImpl implements S3FileService {
 
             pathsToCreate.removeAll(existedPaths);
 
+            String userFolder = pathData.getUserFolder();
+
             for (String pathToCreate : pathsToCreate) {
                 repository.uploadDirectory(pathToCreate);
-                var normalizedData = createFrom(userId, pathToCreate);
-                ResourceInfoResponse response = buildResponse(normalizedData.getPathWithoutUsernameAndResourceName(), normalizedData.getResourceName(), null, normalizedData.getResourceType());
+
+                String relativePath = pathToCreate.substring(userFolder.length());
+                if (relativePath.isEmpty()) {
+                    relativePath = "/";
+                }
+
+                var normalizedData = createFrom(userId, relativePath);
+
+                ResourceInfoResponse response = buildResponse(
+                        normalizedData.getPathWithoutUsernameAndResourceName(),
+                        normalizedData.getResourceName(),
+                        null,
+                        normalizedData.getResourceType()
+                );
 
                 responses.add(response);
             }
@@ -151,6 +162,52 @@ public class S3FileServiceImpl implements S3FileService {
             responses.add(response);
         }
         return responses;
+    }
+
+    @Override
+    public ResourceInfoResponse moveResource(Long userId, String pathFrom, String pathTo) {
+        Resource pathFromData = createFrom(userId, pathFrom);
+        checkPathExists(pathFromData.getPathWithoutResourceName());
+        checkResourceExists(pathFromData.getFullPath(), pathFromData.getResourceType());
+
+        Resource pathToData = createFrom(userId, pathTo);
+
+        boolean isRename = !pathToData.getResourceName().equals(pathFromData.getResourceName());
+        boolean isMoving = !pathToData.getPathWithoutResourceName().equals(pathFromData.getPathWithoutResourceName());
+
+        if (isMoving == isRename) {
+            throw new InvalidResourceOperationException(INVALID_OPERATION_COMBINATION);
+        }
+
+        checkPathExists(pathToData.getPathWithoutResourceName());
+
+
+        if (pathToData.getResourceType() != pathFromData.getResourceType()) {
+            throw new InvalidResourceTypeChangeException(INVALID_RESOURCE_TYPE_CHANGE);
+        }
+        ResourceInfoResponse response;
+        if (pathFromData.getResourceType() == FILE) {
+            repository.copyResource(pathFromData.getFullPath(), pathToData.getFullPath());
+            repository.deleteResource(pathFromData.getFullPath());
+            StatObjectResponse resourceInfo = repository.getResourceInfo(pathToData.getFullPath());
+            response = buildResponse(pathToData.getPathWithoutUsernameAndResourceName(), pathToData.getResourceName(), resourceInfo.size(), pathToData.getResourceType());
+        } else {
+            Set<String> resourcesItemsByPrefix = repository.getResourcesItemsByPrefix(pathFromData.getFullPath(), true).keySet();
+            Map<String, String> oldAndNewPaths = new HashMap<>();
+            for (String oldPath : resourcesItemsByPrefix) {
+                String newPath = oldPath.replace(pathFromData.getFullPath(), pathToData.getFullPath());
+                oldAndNewPaths.put(oldPath, newPath);
+            }
+
+            for (Map.Entry<String, String> entry : oldAndNewPaths.entrySet()) {
+                repository.copyResource(entry.getKey(), entry.getValue());
+                repository.deleteResource(entry.getKey());
+            }
+            StatObjectResponse resourceInfo = repository.getResourceInfo(pathToData.getFullPath());
+            response = buildResponse(pathToData.getPathWithoutUsernameAndResourceName(), pathToData.getResourceName(), resourceInfo.size(), pathToData.getResourceType());
+        }
+
+        return response;
     }
 
     public void createUserDirectory(Long userId) {

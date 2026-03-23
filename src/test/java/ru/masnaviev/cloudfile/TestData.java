@@ -29,6 +29,9 @@ public class TestData {
     public static final String file3Path = "user-1-files/folder1/folder2/hello.txt";
 
     public static final MockMultipartFile file4 = new MockMultipartFile("file", "folder1/hello4.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
+    public static final String file4Path = "user-1-files/folder1/hello4.txt";
     public static final MockMultipartFile file5 = new MockMultipartFile("file", "folder1/hello5.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
+    public static final String file5Path = "user-1-files/folder1/hello5.txt";
     public static final MockMultipartFile file6 = new MockMultipartFile("file", "folder1/folder2/hello6.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world".getBytes());
+    public static final String file6Path = "user-1-files/folder1/hello6.txt";
 }

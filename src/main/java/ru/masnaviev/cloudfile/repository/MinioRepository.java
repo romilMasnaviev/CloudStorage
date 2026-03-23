@@ -122,6 +122,22 @@ public class MinioRepository {
         }
     }
 
+    public ObjectWriteResponse copyResource(String pathFrom, String pathTo) {
+        try {
+            return client.copyObject(CopyObjectArgs.builder()
+                    .bucket(minioBucketName)
+                    .object(pathTo)
+                    .source(CopySource.builder()
+                            .bucket(minioBucketName)
+                            .object(pathFrom)
+                            .build())
+                    .build());
+        } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+            throw new MinioOperationException(e.getMessage(), e.getCause());
+        }
+
+    }
+
     private Map<String, Item> toItemMapByPath(Iterable<Result<Item>> results) {
         Map<String, Item> paths = new HashMap<>();
 

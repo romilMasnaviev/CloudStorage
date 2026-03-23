@@ -110,4 +110,14 @@ public class ControllerAdvice {
     public ResponseEntity<ErrorResponse> handleParentDirectoryDeletionException(ParentDirectoryDeletionException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(405));
     }
+
+    @ExceptionHandler(InvalidResourceOperationException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidResourceOperationException(InvalidResourceOperationException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(400));
+    }
+
+    @ExceptionHandler(InvalidResourceTypeChangeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidInvalidResourceTypeChange(InvalidResourceTypeChangeException ex) {
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(400));
+    }
 }

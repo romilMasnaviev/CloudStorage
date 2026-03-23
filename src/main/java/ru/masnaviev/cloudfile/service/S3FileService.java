@@ -20,6 +20,7 @@ public interface S3FileService {
 
     List<ResourceInfoResponse> uploadResources(Long userId, String path, List<MultipartFile> files);
 
-    void createUserDirectory(Long userId);
+    ResourceInfoResponse moveResource(Long userId, String pathFrom, String pathTo);
 
+    void createUserDirectory(Long userId);
 }

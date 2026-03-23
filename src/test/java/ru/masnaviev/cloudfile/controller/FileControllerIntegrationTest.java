@@ -1,10 +1,7 @@
 package ru.masnaviev.cloudfile.controller;
 
 import com.google.gson.Gson;
-import io.minio.ListObjectsArgs;
-import io.minio.MinioClient;
-import io.minio.RemoveObjectsArgs;
-import io.minio.Result;
+import io.minio.*;
 import io.minio.errors.MinioException;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
@@ -295,7 +292,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("Создание директории, путь не существует")
-    void uploadDirectory_whenInvalidPath_thenReturnException() throws Exception {
+    void uploadDirectory_whenInvalidResourceName_thenReturnException() throws Exception {
         var response = testHelper.performUploadDirectory("folder", cookies);
         testHelper.checkStatusAndMessage(response, PATH_MUST_BE_END_SLASH, HttpStatus.BAD_REQUEST.value());
     }
@@ -309,6 +306,136 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
     }
+
+    @Test
+    @DisplayName("Перемещение файла в другую директорию")
+    void moveResource_whenFilesExists_thenReturnValidResponse() throws Exception {
+        testHelper.performUploadDirectory("folder/", cookies);
+        testHelper.performUploadFile(file1, "", cookies);
+
+        StatObjectResponse response = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder/");
+        assertEquals(0, response.size());
+
+        testHelper.performMoveResource("/hello.txt", "folder/hello.txt", cookies);
+
+        var oldLocationMinioResponse = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/hello.txt"));
+        assertEquals("Object does not exist", oldLocationMinioResponse.getMessage());
+
+        var newLocationMinioResponse = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder/hello.txt");
+        assertEquals(file1.getSize(), newLocationMinioResponse.size());
+    }
+
+
+    @Test
+    @DisplayName("Перемещение директории в другую директорию (вместе с файлами внутри нее)")
+    void moveResource_whenFilesExists_thenReturnValidResponse1() throws Exception {
+        testHelper.performUploadFile(file4, "", cookies);
+        testHelper.performUploadFile(file5, "", cookies);
+
+        var oldLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, file4Path);
+        var oldLocationMinioFile5 = testHelper.performGetStatObjectFromMinio(minioClient, file5Path);
+
+        assertEquals(file4.getSize(), oldLocationMinioFile4.size());
+        assertEquals(file5.getSize(), oldLocationMinioFile5.size());
+
+        testHelper.performUploadDirectory("folder2/", cookies);
+        testHelper.performMoveResource("folder1/", "folder2/folder1/", cookies);
+
+        var newLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder2/folder1/hello4.txt");
+        var newLocationMinioFile5 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder2/folder1/hello5.txt");
+
+        assertEquals(file4.getSize(), newLocationMinioFile4.size());
+        assertEquals(file5.getSize(), newLocationMinioFile5.size());
+    }
+
+    @Test
+    @DisplayName("Переименование  директории в (в директории есть файлы)")
+    void moveResource_whenFilesExists_thenReturnValidResponse2() throws Exception {
+        testHelper.performUploadFile(file4, "", cookies);
+        testHelper.performUploadFile(file5, "", cookies);
+
+        var oldLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, file4Path);
+        var oldLocationMinioFile5 = testHelper.performGetStatObjectFromMinio(minioClient, file4Path);
+
+        assertEquals(file4.getSize(), oldLocationMinioFile4.size());
+        assertEquals(file5.getSize(), oldLocationMinioFile5.size());
+
+        testHelper.performMoveResource("folder1/", "folder2/", cookies);
+
+        var newLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder2/hello4.txt");
+        var newLocationMinioFile5 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder2/hello5.txt");
+
+        assertEquals(file4.getSize(), newLocationMinioFile4.size());
+        assertEquals(file5.getSize(), newLocationMinioFile5.size());
+    }
+
+    @Test
+    @DisplayName("Переименование файла")
+    void moveResource_whenFilesExists_thenReturnValidResponse3() throws Exception {
+        testHelper.performUploadFile(file4, "", cookies);
+
+        var oldLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, file4Path);
+
+        assertEquals(file4.getSize(), oldLocationMinioFile4.size());
+
+        testHelper.performMoveResource("folder1/hello4.txt", "folder1/newHello4.txt", cookies);
+
+        var newLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/newHello4.txt");
+
+        assertEquals(file4.getSize(), newLocationMinioFile4.size());
+    }
+
+    @Test
+    @DisplayName("Одновременные переименование и перемещение файла")
+    void moveResource_whenRenamingAndRemoving_thenReturnException() throws Exception {
+        testHelper.performUploadFile(file4, "", cookies);
+
+        var oldLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, file4Path);
+
+        assertEquals(file4.getSize(), oldLocationMinioFile4.size());
+
+        MockHttpServletResponse response = testHelper.performMoveResource("folder1/hello4.txt", "folder2/newHello4.txt", cookies);
+
+        testHelper.checkStatusAndMessage(response, INVALID_OPERATION_COMBINATION, HttpStatus.BAD_REQUEST.value());
+
+        var minioException = assertThrows(MinioException.class, () -> testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/newHello4.txt"));
+        assertEquals("Object does not exist", minioException.getMessage());
+    }
+
+    @Test
+    @DisplayName("Одинаковые старый и новый путь")
+    void moveResource_whenSameOldAndNewWays_thenReturnException() throws Exception {
+        testHelper.performUploadFile(file4, "", cookies);
+
+        var oldLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, file4Path);
+
+        assertEquals(file4.getSize(), oldLocationMinioFile4.size());
+
+        MockHttpServletResponse response = testHelper.performMoveResource("folder1/hello4.txt", "folder1/hello4.txt", cookies);
+
+        testHelper.checkStatusAndMessage(response, INVALID_OPERATION_COMBINATION, HttpStatus.BAD_REQUEST.value());
+
+        var fileLocation = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/hello4.txt");
+        assertEquals(file4.getSize(), fileLocation.size());
+    }
+
+    @Test
+    @DisplayName("Смена типа файла (с File на Directory)")
+    void moveResource_whenResourceTypeChange_thenReturnException() throws Exception {
+        testHelper.performUploadFile(file4, "", cookies);
+
+        var oldLocationMinioFile4 = testHelper.performGetStatObjectFromMinio(minioClient, file4Path);
+
+        assertEquals(file4.getSize(), oldLocationMinioFile4.size());
+
+        MockHttpServletResponse response = testHelper.performMoveResource("folder1/hello4.txt", "folder1/hello4/", cookies);
+
+        testHelper.checkStatusAndMessage(response, INVALID_RESOURCE_TYPE_CHANGE, HttpStatus.BAD_REQUEST.value());
+
+        var fileLocation = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder1/hello4.txt");
+        assertEquals(file4.getSize(), fileLocation.size());
+    }
+
 
     private MockHttpServletResponse performAuthorization() throws Exception {
         testHelper.performRegistration(USERNAME, PASSWORD, null);

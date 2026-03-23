@@ -24,10 +24,6 @@ public class ResourceBuilder {
 
         String userFolder = initUserFolder(userId);
 
-        if (path.startsWith(userFolder)) {
-            path = path.substring(userFolder.length());
-        }
-
         ResourceType resourceType = path.endsWith("/") ? DIRECTORY : FILE;
 
         String fullPath = initFullPath(path, userFolder, resourceType);

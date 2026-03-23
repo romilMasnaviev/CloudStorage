@@ -32,6 +32,8 @@ public class ErrorMessages {
     public static final String PARENT_DIRECTORY_NOT_FOUND = "Parent directory not found";
     public static final String DIRECTORY_NOT_FOUND = "Directory not found";
     public static final String FILE_NOT_FOUND = "File not found";
+    public static final String INVALID_OPERATION_COMBINATION = "Invalid operation combination";
+    public static final String INVALID_RESOURCE_TYPE_CHANGE = "Invalid resource type change";
 
     public static final String UNEXPECTED_FILE_UPLOAD_EXCEPTION = "File upload failed exception";
     public static final String UNEXPECTED_FILE_EXISTS_CHECKING_ERROR = "Error checking the existence of the file";

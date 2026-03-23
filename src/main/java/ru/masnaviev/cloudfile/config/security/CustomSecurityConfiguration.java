@@ -53,6 +53,7 @@ class CustomSecurityConfiguration {
                         .requestMatchers(UPLOAD_DIRECTORY).authenticated()
                         .requestMatchers(GET_DIRECTORY_CONTENTS_INFO).authenticated()
                         .requestMatchers(UPLOAD_RESOURCE).authenticated()
+                        .requestMatchers(MOVE_RESOURCE).authenticated()
                         .requestMatchers(SWAGGER_AUTH_WHITELIST).permitAll()
                         .anyRequest().denyAll())
                 .build();

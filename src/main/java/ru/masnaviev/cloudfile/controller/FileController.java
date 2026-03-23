@@ -80,6 +80,16 @@ class FileController {
                 .body(response.getResource());
     }
 
+    @GetMapping(MOVE_RESOURCE)
+    public ResponseEntity<?> moveResource(
+            @RequestParam(name = "from", defaultValue = "/") String pathFrom,
+            @RequestParam(name = "to", defaultValue = "/") String pathTo,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getIdByUsername(userDetails.getUsername());
+        ResourceInfoResponse resource = service.moveResource(userId, pathFrom, pathTo);
+        return ResponseEntity.ok(resource);
+    }
+
     @PostMapping(UPLOAD_DIRECTORY)
     public ResponseEntity<?> uploadDirectory(
             @RequestParam(name = "path", defaultValue = "/") String path,

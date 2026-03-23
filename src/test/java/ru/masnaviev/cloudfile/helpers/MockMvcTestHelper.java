@@ -170,6 +170,16 @@ public class MockMvcTestHelper {
                 .getResponse();
     }
 
+    public MockHttpServletResponse performMoveResource(String pathFrom, String pathTo, Cookie[] cookies) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders
+                        .get(MOVE_RESOURCE)
+                        .param("from", pathFrom)
+                        .param("to", pathTo)
+                        .cookie(cookies))
+                .andReturn()
+                .getResponse();
+    }
+
     public StatObjectResponse performGetStatObjectFromMinio(MinioClient minioClient, String path) throws Exception {
         return minioClient.statObject(StatObjectArgs.builder()
                 .bucket("user-files")
