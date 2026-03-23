@@ -12,15 +12,17 @@ public interface S3FileService {
 
     void deleteResource(Long userId, String path);
 
+    List<ResourceInfoResponse> uploadResources(Long userId, String path, List<MultipartFile> files);
+
     DownloadResourceResponse downloadResource(Long userId, String path);
+
+    ResourceInfoResponse moveResource(Long userId, String pathFrom, String pathTo);
+
+    List<ResourceInfoResponse> searchResource(Long userId, String query);
 
     ResourceInfoResponse uploadDirectory(Long userId, String path);
 
     List<ResourceInfoResponse> getDirectoryContentsInfo(Long userId, String path);
-
-    List<ResourceInfoResponse> uploadResources(Long userId, String path, List<MultipartFile> files);
-
-    ResourceInfoResponse moveResource(Long userId, String pathFrom, String pathTo);
 
     void createUserDirectory(Long userId);
 }

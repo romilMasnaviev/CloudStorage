@@ -12,10 +12,21 @@ public class ApiPath {
     public static final String DOWNLOAD_RESOURCE = "/api/resource/download";
     public static final String UPLOAD_RESOURCE = "/api/resource";
     public static final String MOVE_RESOURCE = "/api/resource/move";
+    public static final String FIND_RESOURCE = "/api/resource/search";
 
     public static final String UPLOAD_DIRECTORY = "/api/directory";
     public static final String GET_DIRECTORY_CONTENTS_INFO = "/api/directory";
 
-    public static final String[] SWAGGER_AUTH_WHITELIST = new String[]{"/v3/api-docs*/**", "/swagger-ui/**"};
-
+    public static final String[] SWAGGER_AUTH_WHITELIST = {
+            "/v2/api-docs",
+            "/v3/api-docs",
+            "/v3/api-docs/**",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui/**",
+            "/webjars/**",
+            "/swagger-ui.html"
+    };
 }

@@ -1,6 +1,7 @@
 package ru.masnaviev.cloudfile.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,21 +20,23 @@ import static ru.masnaviev.cloudfile.constatnts.ApiPath.USER_ME_URL;
 
 @RestController
 @RequestMapping
+@Tag(name = "Пользователь", description = "API для работы с данными текущего пользователя")
 class UserController {
 
-    @Tag(name = "user")
-    @Operation(summary = "Get current user info",
-            description = "Returns data about the user currently logged in")
+    @Operation(
+            summary = "Получить информацию о текущем пользователе",
+            description = "Возвращает данные о пользователе, который в данный момент авторизован"
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved user info",
+            @ApiResponse(responseCode = "200", description = "Информация успешно получена",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = UserMeResponse.class))),
-            @ApiResponse(responseCode = "401", description = "User is not authorized",
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping(USER_ME_URL)
-    public ResponseEntity<?> me(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserMeResponse> me(@Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
         UserMeResponse response = new UserMeResponse(userDetails.getUsername());
         return ResponseEntity.ok().body(response);
     }

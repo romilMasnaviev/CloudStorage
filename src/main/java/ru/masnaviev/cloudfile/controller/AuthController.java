@@ -29,6 +29,7 @@ import static ru.masnaviev.cloudfile.constatnts.ApiPath.*;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@Tag(name = "Аутентификация", description = "API для регистрации, авторизации и управления сеансами")
 class AuthController {
     private final AuthService authService;
     private final UserService userService;
@@ -36,24 +37,23 @@ class AuthController {
 
 
     @Operation(
-            summary = "User Registration",
-            description = "Register a new user in the system"
+            summary = "Регистрация пользователя",
+            description = "Регистрирует нового пользователя в системе и создает для него корневую директорию"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User successfully registered",
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно зарегистрирован",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = UserRegistrationResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Validation errors",
+            @ApiResponse(responseCode = "400", description = "Ошибки валидации",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "User already logged in",
+            @ApiResponse(responseCode = "403", description = "Пользователь уже авторизован",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "User already exists",
+            @ApiResponse(responseCode = "409", description = "Пользователь с таким именем уже существует",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @Tag(name = "authentication")
     @PostMapping(AUTH_SIGN_UP_URL)
     public ResponseEntity<UserRegistrationResponse> registration(@RequestBody @Valid UserRegistrationRequest request) {
 
@@ -62,22 +62,21 @@ class AuthController {
         return ResponseEntity.ok().body(response);
     }
 
-    @Operation(summary = "User Authorization", description = "Authorize a user in the system")
+    @Operation(
+            summary = "Авторизация пользователя",
+            description = "Авторизует пользователя в системе и создает сеанс"
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User successfully authorized",
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно авторизован",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = UserAuthorizationResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Invalid username or password",
+            @ApiResponse(responseCode = "401", description = "Неверное имя пользователя или пароль",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "User already logged in",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "User already exists",
+            @ApiResponse(responseCode = "403", description = "Пользователь уже авторизован",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @Tag(name = "authentication")
     @PostMapping(AUTH_SIGN_IN_URL)
     public ResponseEntity<UserAuthorizationResponse> authorization(@RequestBody @Valid UserAuthorizationRequest request,
                                                                    HttpServletRequest servletRequest) {
@@ -86,18 +85,17 @@ class AuthController {
     }
 
     @Operation(
-            summary = "Logout",
-            description = "End user session"
+            summary = "Выход из системы",
+            description = "Завершает текущий сеанс пользователя"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "User successfully logged out", content = @Content()),
-            @ApiResponse(responseCode = "401", description = "User not authorized",
+            @ApiResponse(responseCode = "204", description = "Пользователь успешно вышел из системы", content = @Content()),
+            @ApiResponse(responseCode = "401", description = "Пользователь не авторизован",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @Tag(name = "authentication")
     @PostMapping(AUTH_SIGN_OUT_URL)
-    public ResponseEntity<?> logout(HttpServletRequest servletRequest) {
+    public ResponseEntity<Object> logout(HttpServletRequest servletRequest) {
         authService.logout(servletRequest);
         return ResponseEntity.noContent().build();
     }

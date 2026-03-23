@@ -2,16 +2,14 @@ package ru.masnaviev.cloudfile.dto.response.resource;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import ru.masnaviev.cloudfile.util.ResourceType;
-
-@Builder
-@Data
+@Getter
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResourceInfoResponse {
-    private String path;
-    private String name;
-    private Long size;
-    private ResourceType resourceType;
+    private final String path;
+    private final String name;
+    private final Long size;
+    private final ResourceType resourceType;
 }
