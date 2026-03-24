@@ -312,13 +312,32 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     void getDirectoryContentsInfo_whenDirectoryContainsFiles_thenReturnValidResponse() throws Exception {
         testHelper.performUploadFile(file4, "", cookies);
         testHelper.performUploadFile(file5, "", cookies);
+        testHelper.performUploadDirectory("folder1/", cookies);
+        testHelper.performUploadDirectory("folder1/folder2/", cookies);
 
         var response = testHelper.performGetDirectoryContentsInfo("folder1/", cookies);
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
         String actualJson = response.getContentAsString(StandardCharsets.UTF_8);
         String expectedJson = mapper.writeValueAsString(List.of(
-                file4ExpectedResponse, file5ExpectedResponse));
+                file4ExpectedResponse, file5ExpectedResponse, folder1folder2));
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.LENIENT);
+    }
+
+    @Test
+    @DisplayName("Получение содержимого директории: возвращает список всех файлов в родительской папке")
+    void getDirectoryContentsInfo_whenDirectoryParentContainsFiles_thenReturnValidResponse() throws Exception {
+        testHelper.performUploadFile(file6, "", cookies);
+        testHelper.performUploadFile(file7, "", cookies);
+        testHelper.performUploadDirectory("folder1/", cookies);
+
+        var response = testHelper.performGetDirectoryContentsInfo("/", cookies);
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
+
+        String actualJson = response.getContentAsString(StandardCharsets.UTF_8);
+        String expectedJson = mapper.writeValueAsString(List.of(
+                file6ExpectedResponse, file7ExpectedResponse, folder1ExpectedResponse));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.LENIENT);
     }

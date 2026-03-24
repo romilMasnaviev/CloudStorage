@@ -82,7 +82,7 @@ public class S3FileServiceImpl implements S3FileService {
             }
 
             List<String> pathsToCreate = filesData.getPathsList();
-
+            //TODO
             Set<String> existedPaths = repository.getResourcesItemsByPrefix(resourceData.getFullPath(), true).keySet();
 
             pathsToCreate.removeAll(existedPaths);
@@ -148,18 +148,17 @@ public class S3FileServiceImpl implements S3FileService {
 
         checkPathExists(pathToData.getPathWithoutResourceName());
 
-
         if (pathToData.getResourceType() != pathFromData.getResourceType()) {
             throw new InvalidResourceTypeChangeException(INVALID_RESOURCE_TYPE_CHANGE);
         }
 
         ResourceInfoResponse response;
         if (pathFromData.getResourceType() == FILE) {
-            repository.copyResource(pathFromData.getFullPath(), pathToData.getFullPath());
-            repository.deleteResource(pathFromData.getFullPath());
+            moveResource(pathFromData.getFullPath(), pathToData.getFullPath());
             StatObjectResponse resourceInfo = repository.getResourceInfo(pathToData.getFullPath());
             response = ResourceInfoResponseBuilder.createFrom(pathToData.getPathWithoutUsernameAndResourceName(), pathToData.getResourceName(), resourceInfo.size(), pathToData.getResourceType());
         } else {
+            //TODO
             Set<String> resourcesItemsByPrefix = repository.getResourcesItemsByPrefix(pathFromData.getFullPath(), true).keySet();
             Map<String, String> oldAndNewPaths = new HashMap<>();
             for (String oldPath : resourcesItemsByPrefix) {
@@ -168,8 +167,7 @@ public class S3FileServiceImpl implements S3FileService {
             }
 
             for (Map.Entry<String, String> entry : oldAndNewPaths.entrySet()) {
-                repository.copyResource(entry.getKey(), entry.getValue());
-                repository.deleteResource(entry.getKey());
+                moveResource(entry.getKey(), entry.getValue());
             }
             StatObjectResponse resourceInfo = repository.getResourceInfo(pathToData.getFullPath());
             response = ResourceInfoResponseBuilder.createFrom(pathToData.getPathWithoutUsernameAndResourceName(), pathToData.getResourceName(), resourceInfo.size(), pathToData.getResourceType());
@@ -181,20 +179,11 @@ public class S3FileServiceImpl implements S3FileService {
     @Override
     public List<ResourceInfoResponse> searchResource(Long userId, String query) {
         Resource pathData = createFrom(userId, query);
-        Map<String, Item> resources = repository.getResourcesItemsByPrefix(pathData.getUserFolder(), true);
-        resources.remove(pathData.getFullPath());
+        List<ResourceInfoResponse> resourcesByPrefix = getResourcesByPrefix(pathData.getUserFolder(), true);
 
-        List<ResourceInfoResponse> responses = new ArrayList<>();
-        for (Map.Entry<String, Item> resource : resources.entrySet()) {
-            var resultData = createFrom(userId, resource.getKey().replace(pathData.getUserFolder()+ "/","/"));
-            if (resultData.getResourceType() != DIRECTORY && resultData.getResourceName().toLowerCase().contains(query.toLowerCase())) {
-                ResourceInfoResponse response = ResourceInfoResponseBuilder.createFrom(resultData.getPathWithoutUsernameAndResourceName(), resultData.getResourceName(),
-                        resource.getValue().size(), resultData.getResourceType());
-
-                responses.add(response);
-            }
-        }
-        return responses;
+        return resourcesByPrefix.stream()
+                .filter(r -> r.getResourceType() != DIRECTORY)
+                .filter(r -> r.getName().toLowerCase().contains(query.toLowerCase())).collect(Collectors.toList());
     }
 
     @Override
@@ -218,24 +207,9 @@ public class S3FileServiceImpl implements S3FileService {
         Resource resourceData = createFrom(userId, path);
 
         checkPathExists(resourceData.getPathWithoutResourceName());
+        checkResourceExists(resourceData.getFullPath(), DIRECTORY);
 
-        Map<String, Item> resultMap = repository.getResourcesItemsByPrefix(resourceData.getFullPath(), false);
-        //убираем родительскую папку
-        resultMap.remove(resourceData.getFullPath());
-        List<ResourceInfoResponse> responses = new ArrayList<>();
-
-        for (Map.Entry<String, Item> result : resultMap.entrySet()) {
-
-            var resultData = createFrom(userId,
-                    result.getKey().replace(resourceData.getUserFolder() + "/", ""));
-
-            ResourceInfoResponse response = ResourceInfoResponseBuilder.createFrom(resultData.getPathWithoutUsernameAndResourceName(), resultData.getResourceName(),
-                    resultData.getResourceType() == DIRECTORY ? null : result.getValue().size(), resultData.getResourceType());
-
-            responses.add(response);
-
-        }
-        return responses;
+        return getResourcesByPrefix(resourceData.getFullPath(), false);
     }
 
     @Override
@@ -287,5 +261,20 @@ public class S3FileServiceImpl implements S3FileService {
 
     private InputStreamResource downloadFile(Resource resourceData) {
         return new InputStreamResource(repository.downloadResource(resourceData.getFullPath()));
+    }
+
+    private List<ResourceInfoResponse> getResourcesByPrefix(String resourcesPrefix, boolean recursively) {
+        Map<String, Item> resultMap = repository.getResourcesItemsByPrefix(resourcesPrefix, recursively);
+        resultMap.remove(resourcesPrefix);
+        List<ResourceInfoResponse> responses = new ArrayList<>();
+        for (Map.Entry<String, Item> result : resultMap.entrySet()) {
+            responses.add(ResourceInfoResponseBuilder.createFrom(result.getValue()));
+        }
+        return responses;
+    }
+
+    private void moveResource(String from, String to) {
+        repository.copyResource(from, to);
+        repository.deleteResource(from);
     }
 }

@@ -122,9 +122,9 @@ public class MinioRepository {
         }
     }
 
-    public ObjectWriteResponse copyResource(String pathFrom, String pathTo) {
+    public void copyResource(String pathFrom, String pathTo) {
         try {
-            return client.copyObject(CopyObjectArgs.builder()
+            client.copyObject(CopyObjectArgs.builder()
                     .bucket(minioBucketName)
                     .object(pathTo)
                     .source(CopySource.builder()

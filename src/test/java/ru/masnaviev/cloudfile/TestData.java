@@ -47,6 +47,13 @@ public class TestData {
     public static final ResourceInfoResponse file5ExpectedResponse = createFrom("folder1/", "hello5.txt", file5.getSize(), FILE);
 
     public static final ResourceInfoResponse folder1 = createFrom("", "folder1", null, DIRECTORY);
+    public static final ResourceInfoResponse folder1ExpectedResponse = createFrom("", "folder1", null, DIRECTORY);
     public static final ResourceInfoResponse folder1folder2 = createFrom("folder1/", "folder2", null, DIRECTORY);
+
+    public static final MockMultipartFile file6 = new MockMultipartFile("file", "hello6.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world123456".getBytes());
+    public static final ResourceInfoResponse file6ExpectedResponse = createFrom("", "hello6.txt", file6.getSize(), FILE);
+
+    public static final MockMultipartFile file7 = new MockMultipartFile("file", "hello7.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world1234567".getBytes());
+    public static final ResourceInfoResponse file7ExpectedResponse = createFrom("", "hello7.txt", file7.getSize(), FILE);
 
 }
