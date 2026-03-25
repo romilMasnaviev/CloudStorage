@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.masnaviev.cloudfile.exception.resource.*;
 import ru.masnaviev.cloudfile.exception.user.UserAlreadyExistsException;
@@ -21,38 +20,32 @@ import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.RESOURCE_NOT_FOUND
 @RestControllerAdvice
 public class ControllerAdvice {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> validationExceptionHandler(ConstraintViolationException exception) {
         String message = exception.getMessage().substring(exception.getMessage().indexOf(":") + 1);
         return new ResponseEntity<>(new ErrorResponse(message), HttpStatusCode.valueOf(400));
     }
 
-    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> userAlreadyExistsExceptionHandler(UserAlreadyExistsException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(409));
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> badCredentialsExceptionHandler(BadCredentialsException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(401));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorResponse> noSuchElementExceptionHandler(NoSuchElementException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(404));
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponse> usernameNotFoundExceptionHandler(UsernameNotFoundException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(404));
     }
 
-    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(FileAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> fileAlreadyExistsExceptionHandler(FileAlreadyExistsException exception) {
         return new ResponseEntity<>(new ErrorResponse(exception.getMessage()), HttpStatusCode.valueOf(409));
@@ -119,5 +112,10 @@ public class ControllerAdvice {
     @ExceptionHandler(InvalidResourceTypeChangeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidInvalidResourceTypeChange(InvalidResourceTypeChangeException ex) {
         return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatusCode.valueOf(400));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleInvalidInvalidResourceTypeChange(Exception ex) {
+        return new ResponseEntity<>(new ErrorResponse("Invalid Server error"), HttpStatusCode.valueOf(500));
     }
 }

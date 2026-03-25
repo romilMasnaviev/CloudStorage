@@ -2,8 +2,8 @@ package ru.masnaviev.cloudfile.exception;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "API error response structure")
+@Schema(description = "Структура ответа при ошибке API")
 public record ErrorResponse(
-        @Schema(description = "Error message", example = "Invalid request")
+        @Schema(description = "Сообщение об ошибке", example = "Неверный запрос")
         String message) {
 }

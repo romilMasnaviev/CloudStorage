@@ -100,6 +100,6 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
         var response = testHelper.performAuthorization(USERNAME, PASSWORD + "1", null);
 
-        testHelper.checkStatusAndMessage(response, BAD_CREDENTIALS, 401);
+        testHelper.checkStatusAndMessage(response, "Bad credentials", 401);
     }
 }

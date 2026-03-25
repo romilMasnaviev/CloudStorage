@@ -2,7 +2,7 @@ package ru.masnaviev.cloudfile.dto.response.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Response for successful user authorization")
+@Schema(description = "Ответ при успешной авторизации пользователя")
 public record UserAuthorizationResponse(
-        @Schema(description = "Username", example = "username") String username) {
+        @Schema(description = "Имя пользователя", example = "username") String username) {
 }

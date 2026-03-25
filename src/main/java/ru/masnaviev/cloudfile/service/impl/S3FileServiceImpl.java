@@ -161,8 +161,7 @@ public class S3FileServiceImpl implements S3FileService {
         }
 
         repository.uploadDirectory(resourceData.getFullPath());
-
-        return ResourceInfoResponseBuilder.createResponseFrom(resourceData.getPathWithoutUserFolder(), resourceData.getResourceName(), null, DIRECTORY);
+        return ResourceInfoResponseBuilder.createDirectoryResponseFrom(resourceData.getFullPath());
     }
 
     @Override
