@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,7 @@ import ru.masnaviev.cloudfile.service.UserService;
 
 import static ru.masnaviev.cloudfile.constatnts.ApiPath.*;
 
+@Slf4j
 @RestController
 @RequestMapping
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
@@ -34,7 +36,6 @@ class AuthController {
     private final AuthService authService;
     private final UserService userService;
     private final S3FileService s3FileServiceImpl;
-
 
     @Operation(
             summary = "Регистрация пользователя",

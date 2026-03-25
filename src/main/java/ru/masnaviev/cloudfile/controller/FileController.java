@@ -101,6 +101,8 @@ class FileController {
             @ApiResponse(responseCode = "400", description = "Ошибка загрузки (например, файл не выбран)",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Пользователь не авторизован",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "413", description = "Итоговый размер файла очень большой",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping(path = UPLOAD_RESOURCE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

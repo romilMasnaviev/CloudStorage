@@ -18,14 +18,14 @@ repositories {
 }
 
 ext {
+    minioVersion = '8.6.0'
     flywayVersion = '11.8.2'
-    gsonVersion = '2.13.1'
-    redisVersion = '3.5.0'
     lombokVersion = '1.18.38'
-    redistestContainerVersion = '1.6.4'
+    gsonVersion = '2.13.1'
+    log4jVersion = '2.25.3'
     testContainersVersion = '1.21.1'
+    redistestContainerVersion = '1.6.4'
     springdocVersion = '2.8.9'
-    minioVersion = '8.5.17'
 }
 
 dependencies {
@@ -60,7 +60,6 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:${testContainersVersion}")
     implementation("com.redis.testcontainers:testcontainers-redis:${redistestContainerVersion}")
     testImplementation("org.testcontainers:minio:${testContainersVersion}")
-
 
     // Documentation
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}")

@@ -23,8 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import ru.masnaviev.cloudfile.AbstractIntegrationTest;
+import ru.masnaviev.cloudfile.MockMvcTestHelper;
 import ru.masnaviev.cloudfile.dto.response.resource.ResourceInfoResponseBuilder;
-import ru.masnaviev.cloudfile.helpers.MockMvcTestHelper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

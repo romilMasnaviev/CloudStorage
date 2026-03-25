@@ -55,7 +55,7 @@ class CustomSecurityConfiguration {
                         .requestMatchers(UPLOAD_RESOURCE).authenticated()
                         .requestMatchers(MOVE_RESOURCE).authenticated()
                         .requestMatchers(FIND_RESOURCE).authenticated()
-                        .requestMatchers(SWAGGER_AUTH_WHITELIST).permitAll()
+                        .requestMatchers(SWAGGER_AUTH_WHITELIST).permitAll() //TODO при deploy убрать в denyAll
                         .anyRequest().denyAll())
                 .build();
     }

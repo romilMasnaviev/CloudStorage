@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudfile.helpers;
+package ru.masnaviev.cloudfile;
 
 import com.google.gson.Gson;
 import io.minio.MinioClient;

@@ -12,14 +12,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import ru.masnaviev.cloudfile.AbstractIntegrationTest;
 import ru.masnaviev.cloudfile.MockMvcHelperConfig;
+import ru.masnaviev.cloudfile.MockMvcTestHelper;
 import ru.masnaviev.cloudfile.dto.response.user.UserAuthorizationResponse;
 import ru.masnaviev.cloudfile.dto.response.user.UserRegistrationResponse;
-import ru.masnaviev.cloudfile.helpers.MockMvcTestHelper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.masnaviev.cloudfile.TestData.PASSWORD;
 import static ru.masnaviev.cloudfile.TestData.USERNAME;
-import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.*;
+import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.ACCESS_DENIED;
+import static ru.masnaviev.cloudfile.constatnts.ErrorMessages.USER_ALREADY_EXISTS;
 
 @AutoConfigureMockMvc
 @SpringBootTest
