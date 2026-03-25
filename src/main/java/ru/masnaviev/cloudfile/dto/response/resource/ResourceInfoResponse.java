@@ -1,7 +1,10 @@
 package ru.masnaviev.cloudfile.dto.response.resource;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.masnaviev.cloudfile.util.ResourceType;
 
 @Getter

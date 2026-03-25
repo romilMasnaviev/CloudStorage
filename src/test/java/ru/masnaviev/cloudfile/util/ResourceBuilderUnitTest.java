@@ -34,8 +34,8 @@ class ResourceBuilderUnitTest {
         assertEquals("", resource.getResourceName());
         assertTrue(resource.getPathsList().isEmpty());
         assertEquals("user-1-files/", resource.getFullPath());
-        assertEquals("user-1-files/", resource.getPathWithoutResourceName());
-        assertEquals("/", resource.getPathWithoutUsernameAndResourceName());
+        assertEquals("user-1-files/", resource.getPath());
+        assertEquals("/", resource.getPathWithoutUserFolder());
     }
 
     @Test
@@ -47,8 +47,8 @@ class ResourceBuilderUnitTest {
         assertEquals("test.txt", resource.getResourceName());
         assertTrue(resource.getPathsList().isEmpty());
         assertEquals("user-1-files/test.txt", resource.getFullPath());
-        assertEquals("user-1-files/", resource.getPathWithoutResourceName());
-        assertEquals("/", resource.getPathWithoutUsernameAndResourceName());
+        assertEquals("user-1-files/", resource.getPath());
+        assertEquals("/", resource.getPathWithoutUserFolder());
     }
 
     @Test
@@ -60,8 +60,8 @@ class ResourceBuilderUnitTest {
         assertEquals("test.txt", resource.getResourceName());
         assertEquals("user-1-files/folder1/", resource.getPathsList().getFirst());
         assertEquals("user-1-files/folder1/test.txt", resource.getFullPath());
-        assertEquals("user-1-files/folder1/", resource.getPathWithoutResourceName());
-        assertEquals("folder1/", resource.getPathWithoutUsernameAndResourceName());
+        assertEquals("user-1-files/folder1/", resource.getPath());
+        assertEquals("folder1/", resource.getPathWithoutUserFolder());
     }
 
     @Test
@@ -73,7 +73,7 @@ class ResourceBuilderUnitTest {
         assertEquals("folder2", resource.getResourceName());
         assertEquals("user-1-files/folder1/", resource.getPathsList().getFirst());
         assertEquals("user-1-files/folder1/folder2/", resource.getFullPath());
-        assertEquals("user-1-files/folder1/", resource.getPathWithoutResourceName());
-        assertEquals("folder1/", resource.getPathWithoutUsernameAndResourceName());
+        assertEquals("user-1-files/folder1/", resource.getPath());
+        assertEquals("folder1/", resource.getPathWithoutUserFolder());
     }
 }
