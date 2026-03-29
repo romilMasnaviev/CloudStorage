@@ -146,7 +146,7 @@ public class S3FileServiceImpl implements S3FileService {
         Resource pathData = createFrom(userId, query);
         List<ResourceInfoResponse> resourcesByPrefix = getResourcesByPrefix(pathData.getUserFolder(), true);
 
-        return resourcesByPrefix.stream().filter(r -> r.getResourceType() != DIRECTORY).filter(r -> r.getName().toLowerCase().contains(query.toLowerCase())).collect(Collectors.toList());
+        return resourcesByPrefix.stream().filter(r -> r.getType() != DIRECTORY).filter(r -> r.getName().toLowerCase().contains(query.toLowerCase())).collect(Collectors.toList());
     }
 
     @Override

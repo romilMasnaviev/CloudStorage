@@ -25,5 +25,5 @@ public class ResourceInfoResponse {
     private Long size;
 
     @Schema(description = "Тип ресурса (FILE или DIRECTORY)", example = "FILE")
-    private ResourceType resourceType;
+    private ResourceType type;
 }

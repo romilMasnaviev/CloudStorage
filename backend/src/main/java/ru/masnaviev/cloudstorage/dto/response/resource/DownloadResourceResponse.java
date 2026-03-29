@@ -10,5 +10,5 @@ import ru.masnaviev.cloudstorage.util.ResourceType;
 public class DownloadResourceResponse {
     String resourceName;
     InputStreamResource resource;
-    ResourceType resourceType;
+    ResourceType type;
 }

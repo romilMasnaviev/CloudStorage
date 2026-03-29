@@ -8,6 +8,8 @@ import ru.masnaviev.cloudstorage.util.ResourceType;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static ru.masnaviev.cloudstorage.util.ResourceType.DIRECTORY;
+
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResourceInfoResponseBuilder {
@@ -25,16 +27,15 @@ public class ResourceInfoResponseBuilder {
 
     public static ResourceInfoResponse createResponseFrom(Item item) {
         Path path = Paths.get(item.objectName());
-        ResourceType resourceType = item.objectName().endsWith("/") ? ResourceType.DIRECTORY : ResourceType.FILE;
-        Long size = resourceType == ResourceType.DIRECTORY ? null : item.size();
+        ResourceType resourceType = item.objectName().endsWith("/") ? DIRECTORY : ResourceType.FILE;
+        Long size = resourceType == DIRECTORY ? null : item.size();
         return getResourceInfoResponse(path, resourceType, size);
     }
 
     public static ResourceInfoResponse createDirectoryResponseFrom(String fullPath) {
         Path path = Paths.get(fullPath);
-        ResourceType resourceType = ResourceType.DIRECTORY;
         Long size = null;
-        return getResourceInfoResponse(path, resourceType, size);
+        return getResourceInfoResponse(path, DIRECTORY, size);
     }
 
     public static ResourceInfoResponse createFileResponseFrom(String fullPath, Long size) {
@@ -45,12 +46,12 @@ public class ResourceInfoResponseBuilder {
 
     public static ResourceInfoResponse createResponseFrom(String fullPath, Long size) {
         Path path = Paths.get(fullPath);
-        ResourceType resourceType = fullPath.endsWith("/") ? ResourceType.DIRECTORY : ResourceType.FILE;
+        ResourceType resourceType = fullPath.endsWith("/") ? DIRECTORY : ResourceType.FILE;
         return getResourceInfoResponse(path, resourceType, size);
     }
 
     private static ResourceInfoResponse getResourceInfoResponse(Path path, ResourceType resourceType, Long size) {
-        String name = path.getFileName().toString();
+        String name = path.getFileName().toString() + (resourceType == DIRECTORY ? "/" : "");
 
         String responsePath;
         if (path.getNameCount() <= 2) {

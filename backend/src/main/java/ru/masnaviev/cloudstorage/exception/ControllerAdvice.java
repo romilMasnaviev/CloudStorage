@@ -3,10 +3,12 @@ package ru.masnaviev.cloudstorage.exception;
 import io.minio.errors.ErrorResponseException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -14,6 +16,7 @@ import ru.masnaviev.cloudstorage.exception.resource.*;
 import ru.masnaviev.cloudstorage.exception.user.UserAlreadyExistsException;
 
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.MINIO_EXCEPTION;
 
@@ -119,6 +122,15 @@ public class ControllerAdvice {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
         return buildResponseEntity(ex.getMessage(), 413);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        String message = ex.getFieldErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining("; "));
+        return buildResponseEntity(message, 400);
     }
 
     @ExceptionHandler(Exception.class)

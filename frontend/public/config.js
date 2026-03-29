@@ -28,22 +28,22 @@ window.APP_CONFIG = {
 
     //корректное имя пользователя
     validUsername: {
-        minLength: 5,
-        maxLength: 20,
+        minLength: 8,
+        maxLength: 50,
         pattern: "^[a-zA-Z0-9]+[a-zA-Z_0-9]*[a-zA-Z0-9]+$",
     },
 
     //корректный пароль
     validPassword: {
-        minLength: 5,
-        maxLength: 20,
+        minLength: 8,
+        maxLength: 100,
         pattern: "^[a-zA-Z0-9!@#$%^&*(),.?\":{}|<>[\\]/`~+=-_';]*$",
     },
 
     //корректное имя для папки
     validFolderName: {
         minLength: 1,
-        maxLength: 200,
+        maxLength: 100,
         pattern: "^[^/\\\\:*?\"<>|]+$",
     },
 

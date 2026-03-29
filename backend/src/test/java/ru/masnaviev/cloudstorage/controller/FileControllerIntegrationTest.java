@@ -65,7 +65,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var servletResponse = testHelper.performUploadFile(file1, "/", cookies);
         var minioResponse = testHelper.performGetStatObjectFromMinio(minioClient, file1Path);
 
-        assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+        assertEquals(HttpStatus.CREATED.value(), servletResponse.getStatus());
         assertEquals(file1.getSize(), minioResponse.size());
 
         String expectedJson = mapper.writeValueAsString(List.of(file1ExpectedResponse));
@@ -83,7 +83,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var minioResponse2 = testHelper.performGetStatObjectFromMinio(minioClient, file2Path);
         var minioResponse3 = testHelper.performGetStatObjectFromMinio(minioClient, file3Path);
 
-        assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+        assertEquals(HttpStatus.CREATED.value(), servletResponse.getStatus());
 
         assertEquals(file1.getSize(), minioResponse1.size());
         assertEquals(file2.getSize(), minioResponse2.size());
@@ -123,7 +123,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("Получение информации о директории: если директория существует, возвращается её метадата")
     void getResourceInfo_whenDirectoryExists_thenReturnValidResponse() throws Exception {
         testHelper.performUploadFile(file2, "", cookies);
-        var expectedResponse = ResourceInfoResponseBuilder.createResponseFrom("", "folder1", null, DIRECTORY);
+        var expectedResponse = ResourceInfoResponseBuilder.createResponseFrom("", "folder1/", null, DIRECTORY);
         var servletResponse = testHelper.performGetResourceInfo("folder1/", cookies);
 
         String expectedJson = mapper.writeValueAsString(expectedResponse);
@@ -277,7 +277,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var minioResponse = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder/");
 
         String actualJson = response.getContentAsString();
-        String expectedJson = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("", "folder", null, DIRECTORY));
+        String expectedJson = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("", "folder/", null, DIRECTORY));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.LENIENT);
         assertEquals(0, minioResponse.size());
@@ -332,7 +332,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         testHelper.performUploadFile(file7, "", cookies);
         testHelper.performUploadDirectory("folder1/", cookies);
 
-        var response = testHelper.performGetDirectoryContentsInfo("/", cookies);
+        var response = testHelper.performGetDirectoryContentsInfo("", cookies);
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
         String actualJson = response.getContentAsString(StandardCharsets.UTF_8);
@@ -369,7 +369,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var response = testHelper.performMoveResource("folder1/", "folder2/folder1/", cookies);
 
         String actualResponse = response.getContentAsString(StandardCharsets.UTF_8);
-        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("folder2/", "folder1", null, DIRECTORY));
+        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("folder2/", "folder1/", null, DIRECTORY));
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 
@@ -392,7 +392,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var response = testHelper.performMoveResource("folder1/", "folder2/", cookies);
 
         String actualResponse = response.getContentAsString(StandardCharsets.UTF_8);
-        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("", "folder2", null, DIRECTORY));
+        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("", "folder2/", null, DIRECTORY));
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 

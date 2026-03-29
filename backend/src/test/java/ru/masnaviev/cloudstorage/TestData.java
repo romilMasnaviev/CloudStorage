@@ -46,9 +46,9 @@ public class TestData {
     public static final String file5Path = "user-1-files/folder1/hello5.txt";
     public static final ResourceInfoResponse file5ExpectedResponse = createResponseFrom("folder1/", "hello5.txt", file5.getSize(), FILE);
 
-    public static final ResourceInfoResponse folder1 = createResponseFrom("", "folder1", null, DIRECTORY);
-    public static final ResourceInfoResponse folder1ExpectedResponse = createResponseFrom("", "folder1", null, DIRECTORY);
-    public static final ResourceInfoResponse folder1folder2 = createResponseFrom("folder1/", "folder2", null, DIRECTORY);
+    public static final ResourceInfoResponse folder1 = createResponseFrom("", "folder1/", null, DIRECTORY);
+    public static final ResourceInfoResponse folder1ExpectedResponse = createResponseFrom("", "folder1/", null, DIRECTORY);
+    public static final ResourceInfoResponse folder1folder2 = createResponseFrom("folder1/", "folder2/", null, DIRECTORY);
 
     public static final MockMultipartFile file6 = new MockMultipartFile("file", "hello6.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world123456".getBytes());
     public static final ResourceInfoResponse file6ExpectedResponse = createResponseFrom("", "hello6.txt", file6.getSize(), FILE);

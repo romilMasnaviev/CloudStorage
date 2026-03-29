@@ -1,6 +1,5 @@
 import axios from "axios";
 import {API_FILES} from "../../../../UrlConstants.jsx";
-import StorageExceedException from "../../../../exception/StorageExceedException.jsx";
 import bytes from "bytes";
 
 
@@ -18,7 +17,7 @@ export async function sendUpload(files, updateDownloadTask, updateTask, uploadTa
 
     const formData = new FormData();
     files.forEach(({file, path}) => {
-        formData.append("object", file, path);
+        formData.append("file", file, path);
     })
     formData.append("path", currPath);
 
