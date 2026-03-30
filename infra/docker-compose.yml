@@ -3,6 +3,8 @@ services:
   backend:
     container_name: backend
     image: romilmasnaviev/backend-cloudstorage
+    environment:
+      - JAVA_TOOL_OPTIONS="-Xmx256m -Xms256m"
     env_file:
       - .env
     expose:
