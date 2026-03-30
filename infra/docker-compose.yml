@@ -2,7 +2,7 @@ services:
 
   backend:
     container_name: backend
-    build: ../backend
+    image: romilmasnaviev/backend-cloudstorage
     env_file:
       - .env
     expose:
@@ -58,7 +58,7 @@ services:
 
   nginx:
     container_name: main-nginx
-    image: nginx:alpine
+    image: romilmasnaviev/frontend-cloudstorage
     ports:
       - "80:80"
     volumes:
