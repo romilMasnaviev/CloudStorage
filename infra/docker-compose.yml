@@ -50,7 +50,7 @@ services:
 
   frontend:
     container_name: frontend
-    build: ../frontend
+    image: romilmasnaviev/frontend-cloudstorage
     depends_on:
       - backend
     networks:
