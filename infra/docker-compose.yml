@@ -1,5 +1,4 @@
 services:
-
   backend:
     container_name: backend
     image: romilmasnaviev/backend-cloudstorage
@@ -14,6 +13,7 @@ services:
       - postgres
     networks:
       - cloud-storage-network
+    restart: always
 
   postgres:
     image: postgres:16-alpine
@@ -26,6 +26,7 @@ services:
       - pg_data:/var/lib/postgresql/data
     networks:
       - cloud-storage-network
+    restart: always
 
   redis:
     image: redis:8-alpine
@@ -34,6 +35,7 @@ services:
       - rs_data:/data
     networks:
       - cloud-storage-network
+    restart: always
 
   minio:
     image: minio/minio:latest
@@ -49,6 +51,7 @@ services:
     command: server --console-address ":9001" /data/
     networks:
       - cloud-storage-network
+    restart: always
 
   frontend:
     container_name: frontend
@@ -57,19 +60,22 @@ services:
       - backend
     networks:
       - cloud-storage-network
+    restart: always
 
   nginx:
     container_name: main-nginx
-    image: romilmasnaviev/frontend-cloudstorage
+    image: nginx:alpine
     ports:
       - "80:80"
     volumes:
-      - "../infra/nginx.conf:/etc/nginx/nginx.conf:ro"
+      # Проверь путь! Если ты в папке infra, то путь должен быть ./nginx.conf
+      - "./nginx.conf:/etc/nginx/nginx.conf:ro"
     depends_on:
       - backend
       - frontend
     networks:
       - cloud-storage-network
+    restart: always
 
 networks:
   cloud-storage-network:
