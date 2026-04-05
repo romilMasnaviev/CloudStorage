@@ -13,7 +13,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.masnaviev.cloudstorage.TestData.*;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.*;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.*;
 
 class AuthControllerUnitTest {
 

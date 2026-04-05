@@ -5,10 +5,9 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import ru.masnaviev.cloudstorage.exception.resource.MinioOperationException;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -18,18 +17,15 @@ import java.security.NoSuchAlgorithmException;
 @RequiredArgsConstructor
 class ClientConfiguration {
 
-    private final Environment env;
-    @Value("${minio.bucket.name}")
-    private String minioBucketName;
+    private final MinioProperties minioProperties;
 
     @Bean
     MinioClient minioClient() {
         MinioClient client = MinioClient.builder()
-                .endpoint(env.getProperty("minio.endpoint"))
-                .credentials(env.getProperty("minio.username"), env.getProperty("minio.password"))
+                .endpoint(minioProperties.endpoint())
+                .credentials(minioProperties.username(), minioProperties.password())
                 .build();
-
-        createBucketForFiles(minioBucketName, client);
+        createBucketForFiles(minioProperties.bucketName(), client);
 
         return client;
     }
@@ -44,7 +40,7 @@ class ClientConfiguration {
         } catch (ServerException | InsufficientDataException | ErrorResponseException | IOException |
                  NoSuchAlgorithmException | InvalidKeyException | InvalidResponseException | XmlParserException |
                  InternalException e) {
-            throw new RuntimeException(e);
+            throw new MinioOperationException(e);
         }
     }
 }

@@ -5,6 +5,4 @@ import ru.masnaviev.cloudstorage.dto.response.user.UserRegistrationResponse;
 
 public interface UserService {
     UserRegistrationResponse registration(UserRegistrationRequest request);
-
-    Long getIdByUsername(String username);
 }

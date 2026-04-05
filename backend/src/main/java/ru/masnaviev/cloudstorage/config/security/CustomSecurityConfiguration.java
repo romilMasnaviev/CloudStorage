@@ -12,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static ru.masnaviev.cloudstorage.constatnts.ApiPath.*;
+import static ru.masnaviev.cloudstorage.constants.ApiPath.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -55,7 +55,7 @@ class CustomSecurityConfiguration {
                         .requestMatchers(UPLOAD_RESOURCE).authenticated()
                         .requestMatchers(MOVE_RESOURCE).authenticated()
                         .requestMatchers(FIND_RESOURCE).authenticated()
-                        .requestMatchers(SWAGGER_AUTH_WHITELIST).permitAll() //TODO при deploy убрать в denyAll
+                        .requestMatchers(SWAGGER_AUTH_WHITELIST).permitAll()
                         .anyRequest().denyAll())
                 .build();
     }

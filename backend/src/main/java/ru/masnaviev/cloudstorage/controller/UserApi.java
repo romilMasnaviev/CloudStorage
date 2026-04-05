@@ -9,19 +9,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import ru.masnaviev.cloudstorage.dto.response.user.UserMeResponse;
 import ru.masnaviev.cloudstorage.exception.ErrorResponse;
+import ru.masnaviev.cloudstorage.model.SecurityUser;
 
-import static ru.masnaviev.cloudstorage.constatnts.ApiPath.USER_ME_URL;
+import static ru.masnaviev.cloudstorage.constants.ApiPath.USER_ME_URL;
 
-@RestController
-@RequestMapping
 @Tag(name = "Пользователь", description = "API для работы с данными текущего пользователя")
-class UserController {
+public interface UserApi {
 
     @Operation(
             summary = "Получить информацию о текущем пользователе",
@@ -36,8 +32,5 @@ class UserController {
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping(USER_ME_URL)
-    public ResponseEntity<UserMeResponse> me(@Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
-        UserMeResponse response = new UserMeResponse(userDetails.getUsername());
-        return ResponseEntity.ok().body(response);
-    }
+    ResponseEntity<UserMeResponse> me(@Parameter(hidden = true) @AuthenticationPrincipal SecurityUser user);
 }

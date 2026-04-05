@@ -32,7 +32,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.masnaviev.cloudstorage.TestData.*;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.*;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.*;
 import static ru.masnaviev.cloudstorage.util.ResourceType.DIRECTORY;
 import static ru.masnaviev.cloudstorage.util.ResourceType.FILE;
 
@@ -237,7 +237,6 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         testHelper.performUploadFile(file2, "", cookies);
 
         var response = testHelper.performDownloadResource("folder1/hello.txt", cookies);
-
         assertArrayEquals(file2.getBytes(), response.getContentAsByteArray());
     }
 

@@ -19,8 +19,8 @@ import ru.masnaviev.cloudstorage.dto.response.user.UserRegistrationResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.masnaviev.cloudstorage.TestData.PASSWORD;
 import static ru.masnaviev.cloudstorage.TestData.USERNAME;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.ACCESS_DENIED;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.USER_ALREADY_EXISTS;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.ACCESS_DENIED;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.USER_ALREADY_EXISTS;
 
 @AutoConfigureMockMvc
 @SpringBootTest

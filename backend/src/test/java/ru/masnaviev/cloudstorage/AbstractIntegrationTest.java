@@ -9,11 +9,11 @@ import org.testcontainers.utility.DockerImageName;
 
 public abstract class AbstractIntegrationTest {
 
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16-alpine");
+    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16-alpine");
 
-    static RedisContainer redisContainer = new RedisContainer(DockerImageName.parse("redis:8-alpine"));
+    public static RedisContainer redisContainer = new RedisContainer(DockerImageName.parse("redis:8-alpine"));
 
-    static MinIOContainer minIOContainer = new MinIOContainer(DockerImageName.parse("minio/minio:latest"));
+    public static MinIOContainer minIOContainer = new MinIOContainer(DockerImageName.parse("minio/minio:latest"));
 
     static {
         postgreSQLContainer.start();
@@ -50,6 +50,6 @@ public abstract class AbstractIntegrationTest {
         registry.add("minio.endpoint", () -> minIOContainer.getS3URL());
         registry.add("minio.username", () -> minIOContainer.getUserName());
         registry.add("minio.password", () -> minIOContainer.getPassword());
-        registry.add("minio.bucket.name", () -> "user-files");
+        registry.add("minio.bucketname", () -> "user-files");
     }
 }

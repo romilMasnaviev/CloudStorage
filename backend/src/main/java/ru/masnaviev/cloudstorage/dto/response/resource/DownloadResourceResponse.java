@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.springframework.core.io.InputStreamResource;
 import ru.masnaviev.cloudstorage.util.ResourceType;
 
+
 @AllArgsConstructor
 @Getter
 public class DownloadResourceResponse {

@@ -19,7 +19,7 @@ import ru.masnaviev.cloudstorage.dto.response.user.UserAuthorizationResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.masnaviev.cloudstorage.TestData.PASSWORD;
 import static ru.masnaviev.cloudstorage.TestData.USERNAME;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.UNAUTHORIZED;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.UNAUTHORIZED;
 
 @AutoConfigureMockMvc
 @SpringBootTest

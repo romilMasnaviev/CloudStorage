@@ -26,6 +26,14 @@ public class TestData {
         return user;
     }
 
+    public static User createUser(Long id, String username, String password) {
+        User user = new User();
+        user.setId(id);
+        user.setUsername(username);
+        user.setPassword(password);
+        return user;
+    }
+
     public static final MockMultipartFile file1 = new MockMultipartFile("file", "hello.txt", MediaType.TEXT_PLAIN_VALUE, "Hello,world1".getBytes());
     public static final String file1Path = "user-1-files/hello.txt";
     public static final ResourceInfoResponse file1ExpectedResponse = createResponseFrom("", "hello.txt", file1.getSize(), FILE);

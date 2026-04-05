@@ -1,5 +1,10 @@
-package ru.masnaviev.cloudstorage.constatnts;
+package ru.masnaviev.cloudstorage.constants;
 
+import lombok.NoArgsConstructor;
+
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
 public class ErrorMessages {
     //Security & Sessions
     public static final String ACCESS_DENIED = "Доступ запрещен";

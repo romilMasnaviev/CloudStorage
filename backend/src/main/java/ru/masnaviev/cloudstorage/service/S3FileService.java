@@ -24,5 +24,5 @@ public interface S3FileService {
 
     List<ResourceInfoResponse> getDirectoryContentsInfo(Long userId, String path);
 
-    void createUserDirectory(Long userId);
+    Long createUserDirectory(Long userId);
 }

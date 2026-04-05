@@ -24,7 +24,7 @@ import java.util.zip.ZipInputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static ru.masnaviev.cloudstorage.constatnts.ApiPath.*;
+import static ru.masnaviev.cloudstorage.constants.ApiPath.*;
 
 public class MockMvcTestHelper {
 
@@ -172,7 +172,7 @@ public class MockMvcTestHelper {
 
     public MockHttpServletResponse performMoveResource(String pathFrom, String pathTo, Cookie[] cookies) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders
-                        .get(MOVE_RESOURCE)
+                        .patch(MOVE_RESOURCE)
                         .param("from", pathFrom)
                         .param("to", pathTo)
                         .cookie(cookies))

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.masnaviev.cloudstorage.model.SecurityUser;
 import ru.masnaviev.cloudstorage.repository.UserRepository;
 
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.USERNAME_NOT_FOUND;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.USERNAME_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)

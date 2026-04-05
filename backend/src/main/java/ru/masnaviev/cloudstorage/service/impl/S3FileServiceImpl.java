@@ -22,7 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.*;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.*;
 import static ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponseBuilder.createDirectoryResponseFrom;
 import static ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponseBuilder.createFileResponseFrom;
 import static ru.masnaviev.cloudstorage.util.ResourceBuilder.createFrom;
@@ -175,9 +175,10 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     @Override
-    public void createUserDirectory(Long userId) {
+    public Long createUserDirectory(Long userId) {
         String userFolder = "user-" + userId + "-files" + "/";
         repository.uploadDirectory(userFolder);
+        return userId;
     }
 
     private void deleteDirectory(Resource resourceData) {

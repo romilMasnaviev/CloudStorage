@@ -8,34 +8,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import ru.masnaviev.cloudstorage.dto.request.user.UserAuthorizationRequest;
 import ru.masnaviev.cloudstorage.dto.request.user.UserRegistrationRequest;
 import ru.masnaviev.cloudstorage.dto.response.user.UserAuthorizationResponse;
 import ru.masnaviev.cloudstorage.dto.response.user.UserRegistrationResponse;
 import ru.masnaviev.cloudstorage.exception.ErrorResponse;
-import ru.masnaviev.cloudstorage.service.AuthService;
-import ru.masnaviev.cloudstorage.service.S3FileService;
-import ru.masnaviev.cloudstorage.service.UserService;
 
-import static ru.masnaviev.cloudstorage.constatnts.ApiPath.*;
+import static ru.masnaviev.cloudstorage.constants.ApiPath.*;
 
-@Slf4j
-@RestController
-@RequestMapping
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @Tag(name = "Аутентификация", description = "API для регистрации, авторизации и управления сеансами")
-class AuthController {
-    private final AuthService authService;
-    private final UserService userService;
-    private final S3FileService s3FileServiceImpl;
+public interface AuthApi {
 
     @Operation(
             summary = "Регистрация пользователя",
@@ -56,12 +41,7 @@ class AuthController {
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping(AUTH_SIGN_UP_URL)
-    public ResponseEntity<UserRegistrationResponse> registration(@RequestBody @Valid UserRegistrationRequest request) {
-
-        UserRegistrationResponse response = userService.registration(request);
-        s3FileServiceImpl.createUserDirectory(userService.getIdByUsername(response.username()));
-        return ResponseEntity.ok().body(response);
-    }
+    ResponseEntity<UserRegistrationResponse> registration(@RequestBody @Valid UserRegistrationRequest request);
 
     @Operation(
             summary = "Авторизация пользователя",
@@ -79,11 +59,8 @@ class AuthController {
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping(AUTH_SIGN_IN_URL)
-    public ResponseEntity<UserAuthorizationResponse> authorization(@RequestBody @Valid UserAuthorizationRequest request,
-                                                                   HttpServletRequest servletRequest) {
-        UserAuthorizationResponse response = authService.authorization(request, servletRequest);
-        return ResponseEntity.ok().body(response);
-    }
+    ResponseEntity<UserAuthorizationResponse> authorization(@RequestBody @Valid UserAuthorizationRequest request,
+                                                            HttpServletRequest servletRequest);
 
     @Operation(
             summary = "Выход из системы",
@@ -96,9 +73,5 @@ class AuthController {
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping(AUTH_SIGN_OUT_URL)
-    public ResponseEntity<Object> logout(HttpServletRequest servletRequest) {
-        authService.logout(servletRequest);
-        return ResponseEntity.noContent().build();
-    }
-
+    ResponseEntity<Object> logout(HttpServletRequest servletRequest);
 }

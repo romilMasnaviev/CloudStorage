@@ -14,7 +14,7 @@ import ru.masnaviev.cloudstorage.service.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.masnaviev.cloudstorage.TestData.*;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.USER_ALREADY_EXISTS;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.USER_ALREADY_EXISTS;
 
 @SpringBootTest
 class UserServiceIntegrationTest extends AbstractIntegrationTest {

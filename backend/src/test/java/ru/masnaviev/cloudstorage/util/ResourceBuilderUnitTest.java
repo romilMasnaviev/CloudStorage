@@ -4,8 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.USERID_MUST_NOT_BE_LESS_0;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.USERID_MUST_NOT_BE_LESS_0;
 import static ru.masnaviev.cloudstorage.util.ResourceBuilder.createFrom;
 
 

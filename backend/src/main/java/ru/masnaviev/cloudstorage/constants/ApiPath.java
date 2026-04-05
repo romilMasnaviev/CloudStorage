@@ -1,5 +1,10 @@
-package ru.masnaviev.cloudstorage.constatnts;
+package ru.masnaviev.cloudstorage.constants;
 
+import lombok.NoArgsConstructor;
+
+import static lombok.AccessLevel.PRIVATE;
+
+@NoArgsConstructor(access = PRIVATE)
 public class ApiPath {
     public static final String AUTH_SIGN_UP_URL = "/api/auth/sign-up";
     public static final String AUTH_SIGN_IN_URL = "/api/auth/sign-in";

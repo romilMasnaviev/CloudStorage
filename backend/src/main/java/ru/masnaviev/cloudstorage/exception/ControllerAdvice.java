@@ -18,7 +18,7 @@ import ru.masnaviev.cloudstorage.exception.user.UserAlreadyExistsException;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.MINIO_EXCEPTION;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.MINIO_EXCEPTION;
 
 @Slf4j
 @RestControllerAdvice
@@ -95,8 +95,8 @@ public class ControllerAdvice {
 
     @ExceptionHandler(MinioOperationException.class)
     public ResponseEntity<ErrorResponse> handleMinioOperationException(MinioOperationException ex) {
-        return buildResponseEntity(ex.getMessage(), 500);
-
+        log.error("Ошибка Minio ", ex);
+        return new ResponseEntity<>(new ErrorResponse("Ошибка при работе с файловым хранилищем"), HttpStatusCode.valueOf(500));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

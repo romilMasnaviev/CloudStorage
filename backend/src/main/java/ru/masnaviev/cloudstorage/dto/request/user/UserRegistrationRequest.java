@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-import static ru.masnaviev.cloudstorage.constatnts.ErrorMessages.*;
+import static ru.masnaviev.cloudstorage.constants.ErrorMessages.*;
 
 @Schema(description = "Запрос на регистрацию пользователя")
 public record UserRegistrationRequest(
