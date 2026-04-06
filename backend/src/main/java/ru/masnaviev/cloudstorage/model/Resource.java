@@ -1,6 +1,7 @@
-package ru.masnaviev.cloudstorage.util;
+package ru.masnaviev.cloudstorage.model;
 
 import lombok.Getter;
+import ru.masnaviev.cloudstorage.util.ResourceType;
 
 import java.util.ArrayList;
 import java.util.List;

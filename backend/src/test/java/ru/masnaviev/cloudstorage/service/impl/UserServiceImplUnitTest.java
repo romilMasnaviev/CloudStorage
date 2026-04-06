@@ -53,7 +53,7 @@ class UserServiceImplUnitTest {
         when(repository.existsByUsername(eq(USERNAME))).thenReturn(false);
         User savedUser = createUser(0L, USERNAME, PASSWORD);
         when(repository.save(any(User.class))).thenReturn(savedUser);
-        when(fileService.createUserDirectory(savedUser.getId())).thenReturn(savedUser.getId());
+        when(fileService.createUserDirectoryPath(savedUser.getId())).thenReturn(savedUser.getId());
         UserRegistrationResponse registrationResponse = service.registration(registrationRequest);
 
         assertEquals(registrationRequest.username(), registrationResponse.username());

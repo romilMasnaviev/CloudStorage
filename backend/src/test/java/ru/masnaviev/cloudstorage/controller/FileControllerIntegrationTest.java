@@ -24,7 +24,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import ru.masnaviev.cloudstorage.AbstractIntegrationTest;
 import ru.masnaviev.cloudstorage.MockMvcTestHelper;
-import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponseBuilder;
+import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponseAssembler;
+import ru.masnaviev.cloudstorage.model.ResourceFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -33,8 +34,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.masnaviev.cloudstorage.TestData.*;
 import static ru.masnaviev.cloudstorage.constants.ErrorMessages.*;
-import static ru.masnaviev.cloudstorage.util.ResourceType.DIRECTORY;
-import static ru.masnaviev.cloudstorage.util.ResourceType.FILE;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -123,7 +122,8 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     @DisplayName("Получение информации о директории: если директория существует, возвращается её метадата")
     void getResourceInfo_whenDirectoryExists_thenReturnValidResponse() throws Exception {
         testHelper.performUploadFile(file2, "", cookies);
-        var expectedResponse = ResourceInfoResponseBuilder.createResponseFrom("", "folder1/", null, DIRECTORY);
+        var expectedResponse = ResourceInfoResponseAssembler
+                .resourceToResourceInfoResponse(ResourceFactory.createFromFullMinioPath(1L, "user-1-files/folder1/"), null);
         var servletResponse = testHelper.performGetResourceInfo("folder1/", cookies);
 
         String expectedJson = mapper.writeValueAsString(expectedResponse);
@@ -276,7 +276,8 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var minioResponse = testHelper.performGetStatObjectFromMinio(minioClient, "user-1-files/folder/");
 
         String actualJson = response.getContentAsString();
-        String expectedJson = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("", "folder/", null, DIRECTORY));
+        String expectedJson = mapper.writeValueAsString(ResourceInfoResponseAssembler
+                .resourceToResourceInfoResponse(ResourceFactory.createFromFullMinioPath(1L, "user-1-files/folder/"), null));
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.LENIENT);
         assertEquals(0, minioResponse.size());
@@ -368,7 +369,8 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var response = testHelper.performMoveResource("folder1/", "folder2/folder1/", cookies);
 
         String actualResponse = response.getContentAsString(StandardCharsets.UTF_8);
-        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("folder2/", "folder1/", null, DIRECTORY));
+        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseAssembler
+                .resourceToResourceInfoResponse(ResourceFactory.createFromFullMinioPath(1L, "user-1-files/folder2/folder1/"), null));
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 
@@ -391,7 +393,8 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var response = testHelper.performMoveResource("folder1/", "folder2/", cookies);
 
         String actualResponse = response.getContentAsString(StandardCharsets.UTF_8);
-        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("", "folder2/", null, DIRECTORY));
+        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseAssembler
+                .resourceToResourceInfoResponse(ResourceFactory.createFromFullMinioPath(1L, "user-1-files/folder2/"), null));
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 
@@ -412,7 +415,8 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         var response = testHelper.performMoveResource("folder1/hello4.txt", "folder1/newHello4.txt", cookies);
 
         String actualResponse = response.getContentAsString(StandardCharsets.UTF_8);
-        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseBuilder.createResponseFrom("folder1/", "newHello4.txt", file4.getSize(), FILE));
+        String expectedResponse = mapper.writeValueAsString(ResourceInfoResponseAssembler
+                .resourceToResourceInfoResponse(ResourceFactory.createFromFullMinioPath(1L, "user-1-files/folder1/newHello4.txt"), null));
 
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.LENIENT);
 

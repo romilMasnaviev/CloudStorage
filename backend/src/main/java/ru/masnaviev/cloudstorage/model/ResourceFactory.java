@@ -1,7 +1,8 @@
-package ru.masnaviev.cloudstorage.util;
+package ru.masnaviev.cloudstorage.model;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.masnaviev.cloudstorage.util.ResourceType;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,9 +15,9 @@ import static ru.masnaviev.cloudstorage.util.ResourceType.DIRECTORY;
 import static ru.masnaviev.cloudstorage.util.ResourceType.FILE;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ResourceBuilder {
+public class ResourceFactory {
 
-    public static Resource createFrom(Long userId, String path) {
+    public static Resource createFromUserInput(Long userId, String path) {
 
         validPath(path);
 
@@ -39,6 +40,22 @@ public class ResourceBuilder {
         List<String> pathsList = getPaths(pathWithoutResourceName, userFolder);
 
         return new Resource(userId, fullPath, resourceType, resourceName, userFolder, pathWithoutResourceName, pathWithoutUsernameAndResourceName, pathsList);
+    }
+
+    public static Resource createFromFullMinioPath(Long userId, String path) {
+        String userFolder = initUserFolder(userId);
+        if (path.startsWith(userFolder)) {
+            path = path.replaceFirst(userFolder, "");
+        }
+        return createFromUserInput(userId, path);
+    }
+
+    public static String getUserDirectoryPath(Long userId) {
+        return "user-" + userId + "-files/";
+    }
+
+    private static String initUserFolder(Long userId) {
+        return "user-" + userId + "-files";
     }
 
     private static void validPath(String path) {
@@ -70,10 +87,6 @@ public class ResourceBuilder {
         }
 
         return result.toString();
-    }
-
-    private static String initUserFolder(Long userId) {
-        return "user-" + userId + "-files";
     }
 
     private static List<String> getPaths(String pathWithoutResourceName, String userFolder) {

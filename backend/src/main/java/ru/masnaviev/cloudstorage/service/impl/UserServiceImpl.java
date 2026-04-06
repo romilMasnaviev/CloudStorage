@@ -29,7 +29,7 @@ class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException(USER_ALREADY_EXISTS);
         }
         User savedUser = userRepository.save(createUser(request));
-        fileService.createUserDirectory(savedUser.getId());
+        fileService.createUserDirectoryPath(savedUser.getId());
         return new UserRegistrationResponse(savedUser.getUsername());
     }
 
