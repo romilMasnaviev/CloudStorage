@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudstorage.repository;
+package ru.masnaviev.cloudstorage.storage.impl;
 
 import io.minio.*;
 import io.minio.errors.ErrorResponseException;
@@ -7,10 +7,12 @@ import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 import ru.masnaviev.cloudstorage.config.minio.MinioProperties;
 import ru.masnaviev.cloudstorage.exception.resource.MinioOperationException;
+import ru.masnaviev.cloudstorage.exception.resource.ResourceNotFoundException;
+import ru.masnaviev.cloudstorage.storage.StorageClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,13 +21,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service
+@Repository
 @RequiredArgsConstructor
-public class MinioRepository {
+public class MinioStorageClient implements StorageClient {
 
     private final MinioClient client;
     private final MinioProperties minioProperties;
 
+    @Override
     public void uploadDirectory(String path) {
         try {
             client.putObject(PutObjectArgs.builder()
@@ -38,6 +41,7 @@ public class MinioRepository {
         }
     }
 
+    @Override
     public void uploadFile(String path, MultipartFile file) {
         try {
             client.putObject(PutObjectArgs.builder()
@@ -50,30 +54,34 @@ public class MinioRepository {
         }
     }
 
+    @Override
     public StatObjectResponse getResourceInfo(String path) {
         try {
             return client.statObject(StatObjectArgs.builder()
                     .bucket(minioProperties.bucketName())
                     .object(path)
                     .build());
+        } catch (ErrorResponseException e) {
+            if (e.errorResponse().code().equals("NoSuchKey")) {
+                throw new ResourceNotFoundException("Resource not found");
+            }
+            throw new MinioOperationException(e);
         } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
             throw new MinioOperationException(e);
         }
     }
 
+    @Override
     public Map<String, Item> getResourcesItemsByPrefix(String prefix, boolean recursively) {
         Iterable<Result<Item>> results = client.listObjects(ListObjectsArgs.builder()
                 .bucket(minioProperties.bucketName())
                 .prefix(prefix)
                 .recursive(recursively)
                 .build());
-
-        results.forEach(r -> {
-        });
-
         return toItemMapByPath(results);
     }
 
+    @Override
     public void deleteResource(String path) {
         try {
             client.removeObject(RemoveObjectArgs.builder()
@@ -85,6 +93,7 @@ public class MinioRepository {
         }
     }
 
+    @Override
     public void deleteResources(Iterable<DeleteObject> deleteObjects) {
         Iterable<Result<DeleteError>> results = client.removeObjects(RemoveObjectsArgs.builder()
                 .bucket(minioProperties.bucketName())
@@ -94,6 +103,7 @@ public class MinioRepository {
         });
     }
 
+    @Override
     public boolean checkResourceExists(String path) {
         try {
             client.statObject(StatObjectArgs.builder()
@@ -109,6 +119,7 @@ public class MinioRepository {
         return true;
     }
 
+    @Override
     public GetObjectResponse downloadResource(String fullPath) {
         try {
             return client.getObject(GetObjectArgs.builder()
@@ -120,6 +131,7 @@ public class MinioRepository {
         }
     }
 
+    @Override
     public void copyResource(String pathFrom, String pathTo) {
         try {
             client.copyObject(CopyObjectArgs.builder()
@@ -141,7 +153,8 @@ public class MinioRepository {
 
         try {
             for (Result<Item> result : results) {
-                paths.put(result.get().objectName(), result.get());
+                Item item = result.get();
+                paths.put(item.objectName(), item);
             }
         } catch (MinioException | NoSuchAlgorithmException | InvalidKeyException | IOException e) {
             throw new MinioOperationException(e);

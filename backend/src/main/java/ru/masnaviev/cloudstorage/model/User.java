@@ -1,7 +1,6 @@
 package ru.masnaviev.cloudstorage.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,14 +17,6 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "username",
-            unique = true,
-            nullable = false)
-    @NotBlank
     private String username;
-
-    @NotBlank
-    @Column(nullable = false)
     private String password;
 }

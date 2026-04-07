@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.masnaviev.cloudstorage.model.SecurityUser;
+import ru.masnaviev.cloudstorage.config.security.SecurityUser;
 import ru.masnaviev.cloudstorage.repository.UserRepository;
 
 import static ru.masnaviev.cloudstorage.constants.ErrorMessages.USERNAME_NOT_FOUND;

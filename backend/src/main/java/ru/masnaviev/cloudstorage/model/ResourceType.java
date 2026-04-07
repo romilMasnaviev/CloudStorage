@@ -1,4 +1,4 @@
-package ru.masnaviev.cloudstorage.util;
+package ru.masnaviev.cloudstorage.model;
 
 public enum ResourceType {
     FILE, DIRECTORY

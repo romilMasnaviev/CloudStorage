@@ -24,7 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import ru.masnaviev.cloudstorage.AbstractIntegrationTest;
 import ru.masnaviev.cloudstorage.MockMvcTestHelper;
-import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponseAssembler;
+import ru.masnaviev.cloudstorage.assembler.ResourceInfoResponseAssembler;
 import ru.masnaviev.cloudstorage.model.ResourceFactory;
 
 import java.nio.charset.StandardCharsets;
@@ -42,13 +42,11 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     MockMvcTestHelper testHelper;
+    ObjectMapper mapper = new ObjectMapper();
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private MinioClient minioClient;
-
-    ObjectMapper mapper = new ObjectMapper();
-
     private Cookie[] cookies;
 
     @BeforeEach
@@ -226,7 +224,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     void downloadResource_whenFileExists_thenReturnValidResponse() throws Exception {
         testHelper.performUploadFile(file1, "", cookies);
 
-        var response = testHelper.performDownloadResource("hello.txt", cookies);
+        var response = testHelper.performDownloadResourceSuccess("hello.txt", cookies);
 
         assertArrayEquals(file1.getBytes(), response.getContentAsByteArray());
     }
@@ -236,7 +234,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     void downloadResource_whenFileExistsInDirectory_thenReturnValidResponse() throws Exception {
         testHelper.performUploadFile(file2, "", cookies);
 
-        var response = testHelper.performDownloadResource("folder1/hello.txt", cookies);
+        var response = testHelper.performDownloadResourceSuccess("folder1/hello.txt", cookies);
         assertArrayEquals(file2.getBytes(), response.getContentAsByteArray());
     }
 
@@ -246,7 +244,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
         testHelper.performUploadFile(file4, "", cookies);
         testHelper.performUploadFile(file5, "", cookies);
 
-        var response = testHelper.performDownloadResource("folder1/", cookies);
+        var response = testHelper.performDownloadResourceSuccess("folder1/", cookies);
 
         assertTrue(testHelper.checkFileInZipResponse(response, file4));
         assertTrue(testHelper.checkFileInZipResponse(response, file5));
@@ -255,7 +253,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("Скачивание файла: попытка скачать несуществующий файл возвращает 404 Not Found")
     void downloadResource_whenFileDoesntExist_thenReturnException() throws Exception {
-        var response = testHelper.performDownloadResource("hello.txt", cookies);
+        var response = testHelper.performDownloadResourceFail("hello.txt", cookies);
 
         testHelper.checkStatusAndMessage(response, FILE_NOT_FOUND, HttpStatus.NOT_FOUND.value());
     }
@@ -263,7 +261,7 @@ class FileControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("Скачивание файла: попытка скачать по некорректному пути возвращает 400 Bad Request")
     void downloadResource_whenPathDoesntExist_thenReturnException() throws Exception {
-        var response = testHelper.performDownloadResource("folder/pathDoesntExist/", cookies);
+        var response = testHelper.performDownloadResourceFail("folder/pathDoesntExist/", cookies);
 
         testHelper.checkStatusAndMessage(response, PATH_NOT_FOUND, HttpStatus.BAD_REQUEST.value());
     }

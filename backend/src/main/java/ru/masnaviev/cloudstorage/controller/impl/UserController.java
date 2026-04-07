@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
+import ru.masnaviev.cloudstorage.config.security.SecurityUser;
 import ru.masnaviev.cloudstorage.controller.UserApi;
 import ru.masnaviev.cloudstorage.dto.response.user.UserMeResponse;
-import ru.masnaviev.cloudstorage.model.SecurityUser;
 
 @RestController
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)

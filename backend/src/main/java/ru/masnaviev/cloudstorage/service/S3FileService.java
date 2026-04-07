@@ -1,7 +1,7 @@
 package ru.masnaviev.cloudstorage.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import ru.masnaviev.cloudstorage.dto.response.resource.DownloadResourceResponse;
+import ru.masnaviev.cloudstorage.download.ResourceDownloadData;
 import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponse;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public interface S3FileService {
 
     List<ResourceInfoResponse> uploadResources(Long userId, String path, List<MultipartFile> files);
 
-    DownloadResourceResponse downloadResource(Long userId, String path);
+    ResourceDownloadData downloadResource(Long userId, String path);
 
     ResourceInfoResponse moveResource(Long userId, String pathFrom, String pathTo);
 

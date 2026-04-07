@@ -3,6 +3,7 @@ package ru.masnaviev.cloudstorage.util;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.masnaviev.cloudstorage.model.Resource;
+import ru.masnaviev.cloudstorage.model.ResourceType;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.masnaviev.cloudstorage.constants.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
@@ -31,12 +32,12 @@ class ResourceFactoryUnitTest {
     void createFrom_UserInput_whenFilenameIsSlash_thenReturnValidResource() {
         Resource resource = createFromUserInput(1L, "/");
 
-        assertEquals(ResourceType.DIRECTORY, resource.getResourceType());
-        assertEquals("", resource.getResourceName());
+        assertEquals(ResourceType.DIRECTORY, resource.resourceType());
+        assertEquals("", resource.resourceName());
         assertTrue(resource.getPathsList().isEmpty());
-        assertEquals("user-1-files/", resource.getFullPath());
-        assertEquals("user-1-files/", resource.getPath());
-        assertEquals("/", resource.getPathWithoutUserFolder());
+        assertEquals("user-1-files/", resource.fullPath());
+        assertEquals("user-1-files/", resource.path());
+        assertEquals("/", resource.pathWithoutUserFolder());
     }
 
     @Test
@@ -44,12 +45,12 @@ class ResourceFactoryUnitTest {
     void createFrom_UserInput_whenValidData_thenReturnValidResource() {
         Resource resource = createFromUserInput(1L, "test.txt");
 
-        assertEquals(ResourceType.FILE, resource.getResourceType());
-        assertEquals("test.txt", resource.getResourceName());
+        assertEquals(ResourceType.FILE, resource.resourceType());
+        assertEquals("test.txt", resource.resourceName());
         assertTrue(resource.getPathsList().isEmpty());
-        assertEquals("user-1-files/test.txt", resource.getFullPath());
-        assertEquals("user-1-files/", resource.getPath());
-        assertEquals("/", resource.getPathWithoutUserFolder());
+        assertEquals("user-1-files/test.txt", resource.fullPath());
+        assertEquals("user-1-files/", resource.path());
+        assertEquals("/", resource.pathWithoutUserFolder());
     }
 
     @Test
@@ -57,12 +58,12 @@ class ResourceFactoryUnitTest {
     void createFrom_UserInput_whenValidData_thenReturnValidResource1() {
         Resource resource = createFromUserInput(1L, "folder1/test.txt");
 
-        assertEquals(ResourceType.FILE, resource.getResourceType());
-        assertEquals("test.txt", resource.getResourceName());
+        assertEquals(ResourceType.FILE, resource.resourceType());
+        assertEquals("test.txt", resource.resourceName());
         assertEquals("user-1-files/folder1/", resource.getPathsList().getFirst());
-        assertEquals("user-1-files/folder1/test.txt", resource.getFullPath());
-        assertEquals("user-1-files/folder1/", resource.getPath());
-        assertEquals("folder1/", resource.getPathWithoutUserFolder());
+        assertEquals("user-1-files/folder1/test.txt", resource.fullPath());
+        assertEquals("user-1-files/folder1/", resource.path());
+        assertEquals("folder1/", resource.pathWithoutUserFolder());
     }
 
     @Test
@@ -70,11 +71,11 @@ class ResourceFactoryUnitTest {
     void createFrom_UserInput_whenValidData_thenReturnValidResource2() {
         Resource resource = createFromUserInput(1L, "folder1/folder2/");
 
-        assertEquals(ResourceType.DIRECTORY, resource.getResourceType());
-        assertEquals("folder2", resource.getResourceName());
+        assertEquals(ResourceType.DIRECTORY, resource.resourceType());
+        assertEquals("folder2", resource.resourceName());
         assertEquals("user-1-files/folder1/", resource.getPathsList().getFirst());
-        assertEquals("user-1-files/folder1/folder2/", resource.getFullPath());
-        assertEquals("user-1-files/folder1/", resource.getPath());
-        assertEquals("folder1/", resource.getPathWithoutUserFolder());
+        assertEquals("user-1-files/folder1/folder2/", resource.fullPath());
+        assertEquals("user-1-files/folder1/", resource.path());
+        assertEquals("folder1/", resource.pathWithoutUserFolder());
     }
 }

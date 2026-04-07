@@ -1,49 +1,48 @@
 package ru.masnaviev.cloudstorage.service.impl;
 
-import io.minio.GetObjectResponse;
 import io.minio.StatObjectResponse;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.masnaviev.cloudstorage.dto.response.resource.DownloadResourceResponse;
+import ru.masnaviev.cloudstorage.assembler.ResourceInfoResponseAssembler;
+import ru.masnaviev.cloudstorage.download.ResourceDownloadData;
+import ru.masnaviev.cloudstorage.download.ResourceWriter;
 import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponse;
-import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponseAssembler;
 import ru.masnaviev.cloudstorage.exception.resource.*;
 import ru.masnaviev.cloudstorage.model.Resource;
 import ru.masnaviev.cloudstorage.model.ResourceFactory;
-import ru.masnaviev.cloudstorage.repository.MinioRepository;
+import ru.masnaviev.cloudstorage.model.ResourceType;
 import ru.masnaviev.cloudstorage.service.S3FileService;
-import ru.masnaviev.cloudstorage.util.ResourceType;
+import ru.masnaviev.cloudstorage.storage.StorageClient;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static ru.masnaviev.cloudstorage.constants.ErrorMessages.*;
 import static ru.masnaviev.cloudstorage.model.ResourceFactory.createFromFullMinioPath;
 import static ru.masnaviev.cloudstorage.model.ResourceFactory.createFromUserInput;
-import static ru.masnaviev.cloudstorage.util.ResourceType.DIRECTORY;
-import static ru.masnaviev.cloudstorage.util.ResourceType.FILE;
-import static ru.masnaviev.cloudstorage.util.ZipBuilder.createZipFromResources;
+import static ru.masnaviev.cloudstorage.model.ResourceType.DIRECTORY;
+import static ru.masnaviev.cloudstorage.model.ResourceType.FILE;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class S3FileServiceImpl implements S3FileService {
 
-    private final MinioRepository repository;
+    private final StorageClient repository;
 
     @Override
     public ResourceInfoResponse getResourceInfo(Long userId, String path) {
         Resource resourceData = createFromUserInput(userId, path);
 
-        checkPathExists(resourceData.getPath());
-        checkResourceExists(resourceData.getFullPath(), resourceData.getResourceType());
+        checkPathExists(resourceData.path());
+        checkResourceExists(resourceData.fullPath(), resourceData.resourceType());
 
-        StatObjectResponse response = repository.getResourceInfo(resourceData.getFullPath());
+        StatObjectResponse response = repository.getResourceInfo(resourceData.fullPath());
         return ResourceInfoResponseAssembler.resourceToResourceInfoResponse(resourceData, response.size());
     }
 
@@ -55,26 +54,26 @@ public class S3FileServiceImpl implements S3FileService {
             throw new ParentDirectoryDeletionException(PROTECTED_PARENT_DIRECTORY);
         }
 
-        checkPathExists(resourceData.getPath());
-        checkResourceExists(resourceData.getFullPath(), resourceData.getResourceType());
+        checkPathExists(resourceData.path());
+        checkResourceExists(resourceData.fullPath(), resourceData.resourceType());
 
-        if (resourceData.getResourceType() == DIRECTORY) deleteDirectory(resourceData);
-        else repository.deleteResource(resourceData.getFullPath());
+        if (resourceData.resourceType() == DIRECTORY) deleteDirectory(resourceData);
+        else repository.deleteResource(resourceData.fullPath());
     }
 
     @Override
     public List<ResourceInfoResponse> uploadResources(Long userId, String path, List<MultipartFile> files) {
         Resource resourceData = createFromUserInput(userId, path);
-        checkPathExists(resourceData.getPath());
+        checkPathExists(resourceData.path());
 
-        checkPathEndWithSlash(resourceData.getFullPath());
+        checkPathEndWithSlash(resourceData.fullPath());
 
         List<ResourceInfoResponse> responses = new ArrayList<>();
 
         for (var file : files) {
             Resource fileData = createFromUserInput(userId, path + file.getOriginalFilename());
 
-            if (repository.checkResourceExists(fileData.getFullPath())) {
+            if (repository.checkResourceExists(fileData.fullPath())) {
                 throw new FileAlreadyExistsException(FILE_ALREADY_EXIST);
             }
 
@@ -85,54 +84,54 @@ public class S3FileServiceImpl implements S3FileService {
                     .map(resource -> ResourceInfoResponseAssembler.resourceToResourceInfoResponse(resource, null))
                     .toList());
 
-            repository.uploadFile(fileData.getFullPath(), file);
+            repository.uploadFile(fileData.fullPath(), file);
             responses.add(ResourceInfoResponseAssembler.resourceToResourceInfoResponse(fileData, file.getSize()));
         }
         return responses;
     }
 
     @Override
-    public DownloadResourceResponse downloadResource(Long userId, String path) {
+    public ResourceDownloadData downloadResource(Long userId, String path) {
         Resource resourceData = createFromUserInput(userId, path);
 
-        checkPathExists(resourceData.getPath());
-        checkResourceExists(resourceData.getFullPath(), resourceData.getResourceType());
+        checkPathExists(resourceData.path());
+        checkResourceExists(resourceData.fullPath(), resourceData.resourceType());
 
-        InputStreamResource resource = resourceData.getResourceType() == DIRECTORY ? downloadDirectory(resourceData) : downloadFile(resourceData);
+        ResourceWriter resourceWriter = resourceData.resourceType() == DIRECTORY ? downloadDirectory(resourceData) : downloadFile(resourceData);
 
-        return new DownloadResourceResponse(resourceData.getResourceName(), resource, resourceData.getResourceType());
+        return new ResourceDownloadData(resourceData.resourceName(), resourceWriter, resourceData.resourceType());
     }
 
     @Override
     public ResourceInfoResponse moveResource(Long userId, String pathFrom, String pathTo) {
         Resource pathFromData = createFromUserInput(userId, pathFrom);
-        checkPathExists(pathFromData.getPath());
-        checkResourceExists(pathFromData.getFullPath(), pathFromData.getResourceType());
+        checkPathExists(pathFromData.path());
+        checkResourceExists(pathFromData.fullPath(), pathFromData.resourceType());
 
         Resource pathToData = createFromUserInput(userId, pathTo);
 
-        boolean isRename = !pathToData.getResourceName().equals(pathFromData.getResourceName());
-        boolean isMoving = !pathToData.getPath().equals(pathFromData.getPath());
+        boolean isRename = !pathToData.resourceName().equals(pathFromData.resourceName());
+        boolean isMoving = !pathToData.path().equals(pathFromData.path());
 
         if (isMoving == isRename) {
             throw new InvalidResourceOperationException(INVALID_OPERATION_COMBINATION);
         }
 
-        checkPathExists(pathToData.getPath());
+        checkPathExists(pathToData.path());
 
-        if (pathToData.getResourceType() != pathFromData.getResourceType()) {
+        if (pathToData.resourceType() != pathFromData.resourceType()) {
             throw new InvalidResourceTypeChangeException(INVALID_RESOURCE_TYPE_CHANGE);
         }
 
         ResourceInfoResponse response;
-        if (pathFromData.getResourceType() == FILE) {
-            moveResource(pathFromData.getFullPath(), pathToData.getFullPath());
-            StatObjectResponse resourceInfo = repository.getResourceInfo(pathToData.getFullPath());
+        if (pathFromData.resourceType() == FILE) {
+            moveResource(pathFromData.fullPath(), pathToData.fullPath());
+            StatObjectResponse resourceInfo = repository.getResourceInfo(pathToData.fullPath());
             response = ResourceInfoResponseAssembler.resourceToResourceInfoResponse(pathToData, resourceInfo.size());
         } else {
-            Set<String> resourcesItemsByPrefix = repository.getResourcesItemsByPrefix(pathFromData.getFullPath(), true).keySet();
+            Set<String> resourcesItemsByPrefix = repository.getResourcesItemsByPrefix(pathFromData.fullPath(), true).keySet();
             for (String oldPath : resourcesItemsByPrefix) {
-                String newPath = oldPath.replace(pathFromData.getFullPath(), pathToData.getFullPath());
+                String newPath = oldPath.replace(pathFromData.fullPath(), pathToData.fullPath());
                 moveResource(oldPath, newPath);
             }
             response = ResourceInfoResponseAssembler.resourceToResourceInfoResponse(pathToData, null);
@@ -144,11 +143,10 @@ public class S3FileServiceImpl implements S3FileService {
     @Override
     public List<ResourceInfoResponse> searchResource(Long userId, String query) {
         Resource pathData = createFromUserInput(userId, query);
-        List<ResourceInfoResponse> resourcesByPrefix = getResourcesByPrefix(pathData.getUserFolder(), userId, true);
+        List<ResourceInfoResponse> resourcesByPrefix = getResourcesByPrefix(pathData.userFolder(), userId, true);
 
         return resourcesByPrefix.stream()
-                .filter(r -> r.getType() != DIRECTORY)
-                .filter(r -> r.getName().toLowerCase()
+                .filter(r -> r.name().toLowerCase()
                         .contains(query.toLowerCase())).collect(Collectors.toList());
     }
 
@@ -156,14 +154,14 @@ public class S3FileServiceImpl implements S3FileService {
     public ResourceInfoResponse uploadDirectory(Long userId, String path) {
         Resource resourceData = createFromUserInput(userId, path);
 
-        checkResourceExists(resourceData.getPath(), resourceData.getResourceType());
-        checkPathEndWithSlash(resourceData.getFullPath());
+        checkResourceExists(resourceData.path(), resourceData.resourceType());
+        checkPathEndWithSlash(resourceData.fullPath());
 
-        if (repository.checkResourceExists(resourceData.getFullPath())) {
+        if (repository.checkResourceExists(resourceData.fullPath())) {
             throw new DirectoryAlreadyExistsException(DIRECTORY_ALREADY_EXISTS);
         }
 
-        repository.uploadDirectory(resourceData.getFullPath());
+        repository.uploadDirectory(resourceData.fullPath());
         return ResourceInfoResponseAssembler.resourceToResourceInfoResponse(resourceData, null);
     }
 
@@ -171,10 +169,10 @@ public class S3FileServiceImpl implements S3FileService {
     public List<ResourceInfoResponse> getDirectoryContentsInfo(Long userId, String path) {
         Resource resourceData = createFromUserInput(userId, path);
 
-        checkPathExists(resourceData.getPath());
-        checkResourceExists(resourceData.getFullPath(), DIRECTORY);
+        checkPathExists(resourceData.path());
+        checkResourceExists(resourceData.fullPath(), DIRECTORY);
 
-        return getResourcesByPrefix(resourceData.getFullPath(), userId, false);
+        return getResourcesByPrefix(resourceData.fullPath(), userId, false);
     }
 
     @Override
@@ -185,7 +183,7 @@ public class S3FileServiceImpl implements S3FileService {
     }
 
     private void deleteDirectory(Resource resourceData) {
-        Map<String, Item> resourcesItems = repository.getResourcesItemsByPrefix(resourceData.getFullPath(), true);
+        Map<String, Item> resourcesItems = repository.getResourcesItemsByPrefix(resourceData.fullPath(), true);
 
         List<DeleteObject> objectsForDelete = resourcesItems.keySet().stream().map(DeleteObject::new).toList();
 
@@ -210,19 +208,35 @@ public class S3FileServiceImpl implements S3FileService {
         }
     }
 
-    private InputStreamResource downloadDirectory(Resource resourceData) {
-        Set<String> resourcesForDownload = repository.getResourcesItemsByPrefix(resourceData.getFullPath(), true).keySet();
+    private ResourceWriter downloadDirectory(Resource resourceData) {
+        Set<String> resourceToDownloadNames = repository.getResourcesItemsByPrefix(resourceData.fullPath(), true).keySet();
+        resourceToDownloadNames.remove(resourceData.fullPath());
+        return outputStream -> {
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 
-        Map<String, GetObjectResponse> downloadedResources = resourcesForDownload.stream()
-                .collect(Collectors.toMap(s -> s, repository::downloadResource));
+                for (String resourceToDownloadName : resourceToDownloadNames) {
+                    try (InputStream resourceToDownload = repository.downloadResource(resourceToDownloadName)) {
+                        String prefixToRemove = resourceData.fullPath();
+                        String pathInsideZip = resourceToDownloadName.startsWith(prefixToRemove)
+                                ? resourceToDownloadName.substring(prefixToRemove.length())
+                                : resourceToDownloadName;
 
-        ByteArrayOutputStream byteOut = createZipFromResources(resourceData.getPath(), downloadedResources);
-
-        return new InputStreamResource(new ByteArrayInputStream(byteOut.toByteArray()));
+                        ZipEntry entry = new ZipEntry(pathInsideZip);
+                        zipOutputStream.putNextEntry(entry);
+                        resourceToDownload.transferTo(zipOutputStream);
+                        zipOutputStream.closeEntry();
+                    }
+                }
+            }
+        };
     }
 
-    private InputStreamResource downloadFile(Resource resourceData) {
-        return new InputStreamResource(repository.downloadResource(resourceData.getFullPath()));
+    private ResourceWriter downloadFile(Resource resourceData) {
+        return outputStream -> {
+            try (InputStream resourceToDownload = repository.downloadResource(resourceData.fullPath())) {
+                resourceToDownload.transferTo(outputStream);
+            }
+        };
     }
 
     private List<ResourceInfoResponse> getResourcesByPrefix(String resourcesPrefix, Long userId, boolean recursively) {

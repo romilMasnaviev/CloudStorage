@@ -2,7 +2,6 @@ package ru.masnaviev.cloudstorage.model;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.masnaviev.cloudstorage.util.ResourceType;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,74 +10,73 @@ import java.util.List;
 
 import static ru.masnaviev.cloudstorage.constants.ErrorMessages.PATH_MUST_NOT_BE_EMPTY;
 import static ru.masnaviev.cloudstorage.constants.ErrorMessages.USERID_MUST_NOT_BE_LESS_0;
-import static ru.masnaviev.cloudstorage.util.ResourceType.DIRECTORY;
-import static ru.masnaviev.cloudstorage.util.ResourceType.FILE;
+import static ru.masnaviev.cloudstorage.model.ResourceType.DIRECTORY;
+import static ru.masnaviev.cloudstorage.model.ResourceType.FILE;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResourceFactory {
 
     public static Resource createFromUserInput(Long userId, String path) {
+        validatePath(path);
+        validateUserId(userId);
 
-        validPath(path);
-
-        validUserId(userId);
-
-        String userFolder = initUserFolder(userId);
-
+        String userFolder = buildUserFolder(userId);
         ResourceType resourceType = path.endsWith("/") ? DIRECTORY : FILE;
 
-        String fullPath = initFullPath(path, userFolder, resourceType);
+        String fullPath = buildFullPath(path, userFolder, resourceType);
+        String resourceName = buildResourceName(path, fullPath);
+        String parentFullPath = buildParentFullPath(fullPath, resourceName);
+        String relativeParent = relativeParentPath(path, resourceName);
 
-        String resourceName = initResourceName(path, fullPath);
+        List<String> pathsList = buildPathsList(parentFullPath, userFolder);
 
-        String pathWithoutResourceName = initPathWithoutResourceName(fullPath, resourceName);
+        return new Resource(userId, fullPath, resourceType, resourceName, userFolder,
+                parentFullPath, relativeParent, pathsList);
+    }
 
+
+    private static String relativeParentPath(String path, String resourceName) {
         String substring = path.substring(0, path.lastIndexOf(resourceName));
-
-        String pathWithoutUsernameAndResourceName = substring.isEmpty() ? "/" : substring;
-
-        List<String> pathsList = getPaths(pathWithoutResourceName, userFolder);
-
-        return new Resource(userId, fullPath, resourceType, resourceName, userFolder, pathWithoutResourceName, pathWithoutUsernameAndResourceName, pathsList);
+        return substring.isEmpty() ? "/" : substring;
     }
 
     public static Resource createFromFullMinioPath(Long userId, String path) {
-        String userFolder = initUserFolder(userId);
+        String userFolder = buildUserFolder(userId);
         if (path.startsWith(userFolder)) {
             path = path.replaceFirst(userFolder, "");
         }
         return createFromUserInput(userId, path);
     }
 
-    public static String getUserDirectoryPath(Long userId) {
-        return "user-" + userId + "-files/";
-    }
-
-    private static String initUserFolder(Long userId) {
+    private static String buildUserFolder(Long userId) {
         return "user-" + userId + "-files";
     }
 
-    private static void validPath(String path) {
+    public static String getUserDirectoryPath(Long userId) {
+        return buildUserFolder(userId) + "/";
+    }
+
+    private static void validatePath(String path) {
         if (path.isEmpty()) {
             throw new IllegalArgumentException(PATH_MUST_NOT_BE_EMPTY);
         }
     }
 
-    private static void validUserId(Long userId) {
+    private static void validateUserId(Long userId) {
         if (userId < 0L) {
             throw new IllegalArgumentException(USERID_MUST_NOT_BE_LESS_0);
         }
     }
 
-    private static String initPathWithoutResourceName(String fullPath, String resourceName) {
+    private static String buildParentFullPath(String fullPath, String resourceName) {
         return fullPath.substring(0, fullPath.lastIndexOf(resourceName));
     }
 
-    private static String initResourceName(String path, String fullPath) {
+    private static String buildResourceName(String path, String fullPath) {
         return path.equals("/") ? "" : List.of(fullPath.split("/")).getLast();
     }
 
-    private static String initFullPath(String path, String userFolder, ResourceType resourceType) {
+    private static String buildFullPath(String path, String userFolder, ResourceType resourceType) {
         Path result = Path.of(userFolder, path).normalize();
 
         if (resourceType == DIRECTORY) {
@@ -89,7 +87,7 @@ public class ResourceFactory {
         return result.toString();
     }
 
-    private static List<String> getPaths(String pathWithoutResourceName, String userFolder) {
+    private static List<String> buildPathsList(String pathWithoutResourceName, String userFolder) {
         StringBuilder sb = new StringBuilder();
         List<String> folders = new ArrayList<>(Arrays.stream(pathWithoutResourceName.split("/")).toList());
         List<String> pathsList = new ArrayList<>();

@@ -9,14 +9,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Size;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import ru.masnaviev.cloudstorage.config.security.SecurityUser;
 import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponse;
 import ru.masnaviev.cloudstorage.exception.ErrorResponse;
-import ru.masnaviev.cloudstorage.model.SecurityUser;
 
 import java.util.List;
 
@@ -96,7 +96,7 @@ public interface FileApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping(DOWNLOAD_RESOURCE)
-    ResponseEntity<InputStreamResource> downloadResource(
+    ResponseEntity<StreamingResponseBody> downloadResource(
             @Parameter(description = "Путь к ресурсу для скачивания", example = "documents/report.pdf")
             @RequestParam(name = "path", defaultValue = "/") @Size(max = 100, message = "Длина пути не должна превышать 100 символов.") String path,
             @Parameter(hidden = true) SecurityUser user);

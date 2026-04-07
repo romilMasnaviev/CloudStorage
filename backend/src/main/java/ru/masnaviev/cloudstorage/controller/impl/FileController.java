@@ -2,17 +2,18 @@ package ru.masnaviev.cloudstorage.controller.impl;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import ru.masnaviev.cloudstorage.config.security.SecurityUser;
 import ru.masnaviev.cloudstorage.controller.FileApi;
-import ru.masnaviev.cloudstorage.dto.response.resource.DownloadResourceResponse;
+import ru.masnaviev.cloudstorage.download.ResourceDownloadData;
 import ru.masnaviev.cloudstorage.dto.response.resource.ResourceInfoResponse;
-import ru.masnaviev.cloudstorage.model.SecurityUser;
 import ru.masnaviev.cloudstorage.service.S3FileService;
 
 import java.net.URLEncoder;
@@ -20,8 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
-import static ru.masnaviev.cloudstorage.util.ResourceType.DIRECTORY;
+import static ru.masnaviev.cloudstorage.model.ResourceType.DIRECTORY;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class FileController implements FileApi {
@@ -53,19 +55,24 @@ class FileController implements FileApi {
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> downloadResource(
+    public ResponseEntity<StreamingResponseBody> downloadResource(
             String path,
             @AuthenticationPrincipal SecurityUser user) {
 
-        DownloadResourceResponse response = service.downloadResource(user.getUserId(), path);
+        ResourceDownloadData response = service.downloadResource(user.getUserId(), path);
         HttpHeaders headers = new HttpHeaders();
-        String postfix = response.getType() == DIRECTORY ? ".zip" : "";
+        String postfix = response.type() == DIRECTORY ? ".zip" : "";
         headers.add(CONTENT_DISPOSITION, "attachment;filename*=utf-8''"
-                + encodeFileName(response.getResourceName()) + postfix);
+                + encodeFileName(response.resourceName()) + postfix);
+
+        StreamingResponseBody body = outputStream -> response.resourceWriter()
+                .writeResourceToOutputStream(outputStream);
+
         return ResponseEntity.ok()
-                .headers(headers)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(response.getResource());
+                .headers(headers)
+                .body(body);
+
     }
 
     @Override

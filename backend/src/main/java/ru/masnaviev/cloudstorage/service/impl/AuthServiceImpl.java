@@ -25,7 +25,8 @@ class AuthServiceImpl implements AuthService {
         var token = new UsernamePasswordAuthenticationToken(request.username(), request.password());
         Authentication authentication = manager.authenticate(token);
 
-        SecurityContext context = setSecurityContext(authentication);
+        SecurityContext context = createSecurityContext(authentication);
+        SecurityContextHolder.setContext(context);
         setSession(servletRequest, context);
 
         return new UserAuthorizationResponse(request.username());
@@ -41,7 +42,7 @@ class AuthServiceImpl implements AuthService {
         session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, context);
     }
 
-    private SecurityContext setSecurityContext(Authentication authentication) {
+    private SecurityContext createSecurityContext(Authentication authentication) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         return context;

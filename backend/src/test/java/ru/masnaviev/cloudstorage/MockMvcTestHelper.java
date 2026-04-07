@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.masnaviev.cloudstorage.dto.request.user.UserAuthorizationRequest;
@@ -22,8 +24,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static ru.masnaviev.cloudstorage.constants.ApiPath.*;
 
 public class MockMvcTestHelper {
@@ -143,7 +145,7 @@ public class MockMvcTestHelper {
                 .getResponse();
     }
 
-    public MockHttpServletResponse performDownloadResource(String path, Cookie[] cookies) throws Exception {
+    public MockHttpServletResponse performDownloadResourceFail(String path, Cookie[] cookies) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders
                         .get(DOWNLOAD_RESOURCE)
                         .param("path", path)
@@ -151,6 +153,20 @@ public class MockMvcTestHelper {
                 .andReturn()
                 .getResponse();
     }
+
+    public MockHttpServletResponse performDownloadResourceSuccess(String path, Cookie[] cookies) throws Exception {
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
+                        .get(DOWNLOAD_RESOURCE)
+                        .param("path", path)
+                        .cookie(cookies))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        ResultActions resultActions = mockMvc.perform(asyncDispatch(mvcResult));
+
+        return resultActions.andReturn().getResponse();
+    }
+
 
     public MockHttpServletResponse performUploadDirectory(String path, Cookie[] cookies) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders
@@ -203,7 +219,7 @@ public class MockMvcTestHelper {
             ZipEntry entry;
             while ((entry = stream.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
-                    if (entry.getName().endsWith(fileName)) {
+                    if (fileName.endsWith(entry.getName())) {
                         return true;
                     }
                 }
